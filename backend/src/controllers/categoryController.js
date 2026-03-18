@@ -2,19 +2,25 @@ const Category = require("../models/Category");
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, slug, description, parent, isActive, showInNavbar, navbarIndex } = req.body;
 
-        if (!name) {
-            return res.status(400).json({ message: "Name is required" });
+        if (!name || !slug) {
+            return res.status(400).json({ message: "Name and Slug are required" });
         }
 
-        const category = await Category.create({ name });
+        const categoryData = { 
+            name, 
+            slug, 
+            description,
+            isActive: isActive !== undefined ? isActive : true,
+            showInNavbar: showInNavbar !== undefined ? showInNavbar : false,
+            navbarIndex: navbarIndex !== undefined ? navbarIndex : 0
+        };
+        if (parent) categoryData.parent = parent;
 
-        if (!category) {
-            return res.status(400).json({ message: "Category not created" });
-        }
+        const category = await Category.create(categoryData);
 
-        return res.status(200).json({
+        return res.status(201).json({
             success: true,
             message: "Category created successfully",
             category
@@ -27,7 +33,7 @@ exports.createCategory = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
     try {
-        const categories = await Category.find();
+        const categories = await Category.find().populate("parent", "name").sort({ navbarIndex: 1, createdAt: 1 });
         return res.status(200).json({
             success: true,
             message: "Categories fetched successfully",
@@ -41,7 +47,10 @@ exports.getCategories = async (req, res) => {
 
 exports.getCategory = async (req, res) => {
     try {
-        const category = await Category.findById(req.params.id);
+        const category = await Category.findById(req.params.id).populate("parent", "name");
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
         return res.status(200).json({
             success: true,
             message: "Category fetched successfully",
@@ -53,16 +62,38 @@ exports.getCategory = async (req, res) => {
     }
 };
 
+exports.getCategoryBySlug = async (req, res) => {
+    try {
+        const category = await Category.findOne({ slug: req.params.slug }).populate("parent", "name");
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Category fetched successfully",
+            category
+        });
+    } catch (err) {
+        console.log(err, "[Error] Get category by slug..");
+        return res.status(500).json({ message: err.message });
+    }
+};
+
 exports.updateCategory = async (req, res) => {
     try {
-        console.log(req.params.id, "[Update category]");
-        const { name } = req.body;
+        const { name, slug, description, parent, isActive, showInNavbar, navbarIndex } = req.body;
         const category = await Category.findById(req.params.id);
         if (!category) {
-            return res.status(400).json({ message: "Category not found" });
+            return res.status(404).json({ message: "Category not found" });
         }
 
-        category.name = name;
+        category.name = name || category.name;
+        category.slug = slug || category.slug;
+        category.description = description !== undefined ? description : category.description;
+        category.parent = parent !== undefined ? (parent || null) : category.parent;
+        category.isActive = isActive !== undefined ? isActive : category.isActive;
+        category.showInNavbar = showInNavbar !== undefined ? showInNavbar : category.showInNavbar;
+        category.navbarIndex = navbarIndex !== undefined ? navbarIndex : category.navbarIndex;
 
         await category.save();
 
@@ -79,12 +110,10 @@ exports.updateCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     try {
-        console.log(req.params.id, "[Delete category]");
-
         const category = await Category.findByIdAndDelete(req.params.id);
 
         if (!category) {
-            return res.status(400).json({ message: "Category not found" });
+            return res.status(404).json({ message: "Category not found" });
         }
 
         return res.status(200).json({

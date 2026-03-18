@@ -1,0 +1,114 @@
+'use client';
+
+import React from 'react';
+import { Edit, Trash2 } from 'lucide-react';
+
+export interface Column<T> {
+  header: string;
+  accessor: keyof T | ((item: T) => React.ReactNode);
+  className?: string;
+}
+
+interface DataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  isLoading?: boolean;
+  onEdit?: (item: T) => void;
+  onDelete?: (id: string) => void;
+  idField?: keyof T;
+  emptyMessage?: string;
+  loadingMessage?: string;
+}
+
+export default function DataTable<T extends { _id?: string; id?: string }>({
+  data,
+  columns,
+  isLoading = false,
+  onEdit,
+  onDelete,
+  idField = '_id',
+  emptyMessage = 'No data found in the system',
+  loadingMessage = 'Synchronizing Data',
+}: DataTableProps<T>) {
+  return (
+    <div className="bg-white border border-ink/10 shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-ink/10 bg-gray-50/50">
+              {columns.map((column, index) => (
+                <th
+                  key={index}
+                  className={`p-6 text-[10px] font-black uppercase tracking-[0.3em] text-ink/30 ${column.className || ''}`}
+                >
+                  {column.header}
+                </th>
+              ))}
+              {(onEdit || onDelete) && (
+                <th className="p-6 text-[10px] font-black uppercase tracking-[0.3em] text-ink/30 text-right">
+                  Actions
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-ink/5">
+            {isLoading ? (
+              <tr>
+                <td colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="p-20 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border border-ink/10 border-t-ink rounded-full animate-spin"></div>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-ink/40">
+                      {loadingMessage}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="p-20 text-center">
+                  <p className="text-[11px] uppercase font-bold tracking-widest text-ink/30 italic">
+                    {emptyMessage}
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              data.map((item, rowIndex) => (
+                <tr key={(item[idField] as string) || rowIndex} className="group hover:bg-cream/30 transition-colors">
+                  {columns.map((column, colIndex) => (
+                    <td key={colIndex} className={`p-6 ${column.className || ''}`}>
+                      {typeof column.accessor === 'function'
+                        ? column.accessor(item)
+                        : (item[column.accessor] as React.ReactNode)}
+                    </td>
+                  ))}
+                  {(onEdit || onDelete) && (
+                    <td className="p-6 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {onEdit && (
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="p-2 hover:bg-ink text-ink hover:text-white border border-ink/5 transition-all"
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            onClick={() => onDelete((item[idField] as string) || '')}
+                            className="p-2 hover:bg-red-600 text-ink hover:text-white border border-ink/5 transition-all"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

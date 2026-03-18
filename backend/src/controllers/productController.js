@@ -15,14 +15,16 @@ exports.createProduct = async (req, res) => {
             variants,
             material,
             soleMaterial,
+            whatsapp,
             tags,
             isFeatured,
             isActive
         } = req.body;
 
-        const images = req.files ? req.files.map(file => ({
+        const images = req.files ? req.files.map((file, index) => ({
             url: file.path,
-            public_id: file.filename
+            public_id: file.filename,
+            index: index
         })) : [];
 
         const product = await Product.create({
@@ -38,6 +40,7 @@ exports.createProduct = async (req, res) => {
             variants: variants ? (typeof variants === "string" && variants !== "[object Object]" ? JSON.parse(variants) : variants) : [],
             material,
             soleMaterial,
+            whatsapp,
             tags: tags
                 ? (Array.isArray(tags) ? tags : tags.split(","))
                 : [],
@@ -115,8 +118,8 @@ exports.updateProduct = async (req, res) => {
             category,
             brand,
             variants,
-            material,
             soleMaterial,
+            whatsapp,
             tags,
             isFeatured,
             isActive
@@ -130,19 +133,18 @@ exports.updateProduct = async (req, res) => {
             mrp,
             discount,
             category,
-            brand,
-            variants: variants ? (typeof variants === "string" && variants !== "[object Object]" ? JSON.parse(variants) : variants) : undefined,
-            material,
             soleMaterial,
-            tags: tags ? tags.split(",") : undefined,
+            whatsapp,
+            tags: tags ? (Array.isArray(tags) ? tags : tags.split(",")) : undefined,
             isFeatured,
             isActive
         };
 
         if (req.files && req.files.length > 0) {
-            updateData.images = req.files.map(file => ({
+            updateData.images = req.files.map((file, index) => ({
                 url: file.path,
-                public_id: file.filename
+                public_id: file.filename,
+                index: index
             }));
         }
 

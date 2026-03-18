@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --font-cinzel: var(--font-cinzel);
+  --font-cormorant: var(--font-cormorant);
+  --font-dm-sans: var(--font-dm-sans);
+
+  --color-cream: #f5f3ee;
+  --color-ink: #0a0a0a;
+}
+
+@layer base {
+  :root {
+    --cream: #f5f3ee;
+    --ink: #0a0a0a;
+  }
+
+  body {
+    @apply font-dm-sans bg-white text-gray-900;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-cinzel tracking-[0.05em] uppercase;
+  }
+
+  .italic-serif {
+    @apply font-cormorant italic;
+  }
+}
+
+@layer utilities {
+  .border-thin {
+    border-width: 0.5px;
+    @apply border-ink/10;
+  }
+
+  .letter-spacing-wide {
+    letter-spacing: 0.1em;
+  }
+
+  .letter-spacing-extra-wide {
+    letter-spacing: 0.25em;
+  }
+
+  .eyebrow::before {
+    content: "—— ";
+    @apply opacity-30;
+  }
+}
+
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  @apply rounded-none opacity-20;
+}
+
+@keyframes modal-bounce {
+  0% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.05);
+  }
+
+  60% {
+    transform: scale(0.97);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-once {
+  animation: modal-bounce 0.4s ease;
+}

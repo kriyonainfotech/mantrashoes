@@ -23,7 +23,6 @@ const productSchema = new mongoose.Schema(
         },
         discount: {
             type: Number,
-            required: true
         },
 
         category: {
@@ -33,13 +32,13 @@ const productSchema = new mongoose.Schema(
 
         brand: {
             type: String,
-            required: true
         },
 
         images: [
             {
                 url: String,
-                public_id: String
+                public_id: String,
+                index: Number
             }
         ],
 
@@ -47,32 +46,29 @@ const productSchema = new mongoose.Schema(
             {
                 size: {
                     type: Number,
-                    required: true
                 },
                 color: {
                     type: String,
-                    required: true
                 },
                 stock: {
                     type: Number,
-                    required: true
                 },
                 sku: {
                     type: String,
-                    required: true
                 }
             }
         ],
 
         material: {
             type: String,
-            required: true
         },
         soleMaterial: {
             type: String,
+        },
+        whatsapp: {
+            type: String,
             required: true
         },
-
         tags: [String],
 
         isFeatured: {
