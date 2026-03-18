@@ -7,8 +7,12 @@ let isConnected = false;
 
 module.exports = async (req, res) => {
   if (!isConnected) {
-    await connectDB();
-    isConnected = true;
+    try {
+      await connectDB();
+      isConnected = true;
+    } catch (err) {
+      return res.status(500).json({ message: "Database connection failed" });
+    }
   }
   return app(req, res);
 };
