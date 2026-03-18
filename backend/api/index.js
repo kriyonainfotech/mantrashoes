@@ -3,6 +3,10 @@ const connectDB = require("../src/config/db");
 
 let isConnected = false;
 
+app.get("/", (req, res) => {
+  res.send("API running 🚀");
+});
+
 module.exports = async (req, res) => {
   if (!isConnected) {
     await connectDB();
