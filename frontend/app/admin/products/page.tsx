@@ -8,34 +8,33 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 
 export default function ProductsPage() {
-  const { data, fetchData, setData } = useAppStore();
+  const { data, setData } = useAppStore();
   const [saving, setSaving] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-
+  const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
+        const [prodRes, catRes] = await Promise.all([
+          fetch(`${API_URL}/products/get-products`),
+          fetch(`${API_URL}/categories/get-categories`),
+        ]);
         const products = await prodRes.json();
-
-        const catRes = await fetch(`${API_URL}/api/categories/get-categories`);
         const cats = await catRes.json();
-
-        console.log(cats.categories, "cats");
-        setCategories(cats.categories);
-        setData({ ...data, products });
+        setCategories(cats.categories || []);
+        setData({ ...(data || {}), products: products.products || products || [] });
       } catch (error) {
         console.error('Failed to fetch data', error);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
-  }, [setData]);
-
-  if (!data) return <div className="p-8">Loading...</div>;
+  }, []);
 
   const handleAddProduct = () => {
     setIsNewProduct(true);
@@ -126,13 +125,13 @@ export default function ProductsPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/api/products/delete-product/${id}`, {
+      const res = await fetch(`${API_URL}/products/delete-product/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
+        const prodRes = await fetch(`${API_URL}/products/get-products`);
         const products = await prodRes.json();
-        setData({ ...data, products });
+        setData({ ...(data || {}), products: products.products || products || [] });
       }
     } catch (error) {
       console.error(error);
@@ -167,8 +166,8 @@ export default function ProductsPage() {
       });
 
       const url = isNewProduct
-        ? `${API_URL}/api/products/create-product`
-        : `${API_URL}/api/products/update-product/${editingProduct._id}`;
+        ? `${API_URL}/products/create-product`
+        : `${API_URL}/products/update-product/${editingProduct._id}`;
 
       const method = isNewProduct ? 'POST' : 'PUT';
 
@@ -178,9 +177,9 @@ export default function ProductsPage() {
       });
 
       if (res.ok) {
-        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
+        const prodRes = await fetch(`${API_URL}/products/get-products`);
         const products = await prodRes.json();
-        setData({ ...data, products });
+        setData({ ...(data || {}), products: products.products || products || [] });
         setEditingProduct(null);
         setIsNewProduct(false);
         setImageFiles([]);
@@ -209,7 +208,8 @@ export default function ProductsPage() {
       </div>
 
       <DataTable
-        data={data.products}
+        data={data?.products || []}
+        isLoading={loading}
         columns={[
           {
             header: 'Product',

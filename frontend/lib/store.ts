@@ -13,10 +13,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   fetchData: async (force = false) => {
     if (get().data && !force) return;
     try {
-      const prodRes = await fetch(`${API_URL}/api/products/get-products`);
-      const products = await prodRes.json();
-      
-      const catRes = await fetch(`${API_URL}/api/categories/get-categories`);
+      const prodRes = await fetch(`${API_URL}/products/get-products`);
+      const prodData = await prodRes.json();
+      const products = prodData.products || prodData || [];
+
+      const catRes = await fetch(`${API_URL}/categories/get-categories`);
       const categoriesData = await catRes.json();
       
       // Keep existing structure for sections/theme but update products/categories
@@ -69,7 +70,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ 
         data: { 
           ...currentData,
-          products: products || [], 
+          products: products, 
           categories: categoriesData.categories || [] 
         } 
       });
