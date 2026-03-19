@@ -3,9 +3,22 @@ import { Cinzel, Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 
-const cinzel = Cinzel({ weight: '400', subsets: ['latin'], variable: '--font-cinzel' });
-const cormorant = Cormorant_Garamond({ weight: ['400', '500', '600', '700'], style: ['normal', 'italic'], subsets: ['latin'], variable: '--font-cormorant' });
-const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
+const cinzel = Cinzel({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-cinzel',
+});
+const cormorant = Cormorant_Garamond({
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  variable: '--font-cormorant',
+});
+const dmSans = DM_Sans({
+  weight: ['300', '400', '500'],
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Mantra Shoes | Premium Footwear',
@@ -15,10 +28,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cinzel.variable} ${cormorant.variable} ${dmSans.variable}`}>
-      <body className="font-sans antialiased bg-white text-gray-900" suppressHydrationWarning>
-        <Providers>
-          {children}
-        </Providers>
+      <body suppressHydrationWarning>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

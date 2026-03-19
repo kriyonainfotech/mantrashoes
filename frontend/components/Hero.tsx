@@ -4,139 +4,158 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
-export default function Hero({ data, products, theme }: { data: any, products: any[], theme: any }) {
-  const heroProducts = products?.filter(p => p.showInHero) || [];
-  const [currentIndex, setCurrentIndex] = useState(0);
+function getImg(img: any) {
+  return typeof img === 'string' ? img : img?.url || '';
+}
+
+export default function Hero({ data, products, theme }: { data: any; products: any[]; theme: any }) {
+  const heroProducts = products?.filter((p) => p.showInHero && p.isActive !== false) || [];
+  const [idx, setIdx] = useState(0);
 
   useEffect(() => {
     if (heroProducts.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroProducts.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const t = setInterval(() => setIdx((i) => (i + 1) % heroProducts.length), 5500);
+    return () => clearInterval(t);
   }, [heroProducts.length]);
 
-  if (!data?.enabled && heroProducts.length === 0) return null;
-
-  // If no products are toggled for hero, fallback to static hero
+  // Static fallback
   if (heroProducts.length === 0) {
     return (
-      <section className="relative h-screen w-full overflow-hidden bg-black flex items-center justify-center">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, ease: "easeOut" }}
-          className="absolute inset-0 z-0"
-        >
-          {data.image && (
-            <Image
-              src={data.image}
-              alt="Hero"
-              fill
-              className="object-cover opacity-60"
-              referrerPolicy="no-referrer"
-              priority
-            />
-          )}
-        </motion.div>
-
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto mt-20">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tighter"
-            style={{ fontFamily: 'var(--font-montserrat)' }}
-          >
-            {data.title}
-          </motion.h1>
-
+      <section className="relative h-screen w-full overflow-hidden flex items-end" style={{ backgroundColor: '#0a0a0a' }}>
+        {data?.image && (
+          <Image src={data.image} alt="Hero" fill className="object-cover opacity-50" priority referrerPolicy="no-referrer" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-20 md:pb-28">
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-gray-200 mb-10 font-light"
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-white/50 mb-4"
+            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.35em' }}
           >
-            {data.subtitle}
+            NEW COLLECTION
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.35 }}
+            className="text-white mb-6"
+            style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(3rem, 8vw, 6rem)', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '0.02em' }}
+          >
+            {data?.title || 'Mantra'}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-white/60 max-w-md mb-10"
+            style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 300, lineHeight: 1.7 }}
+          >
+            {data?.subtitle}
           </motion.p>
         </div>
       </section>
     );
   }
 
-  const currentProduct = heroProducts[currentIndex];
+  const product = heroProducts[idx];
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative h-screen w-full overflow-hidden flex items-end" style={{ backgroundColor: '#0a0a0a' }}>
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentProduct._id || currentProduct.id}
-          initial={{ opacity: 0, scale: 1.05 }}
+          key={product._id || product.id}
+          initial={{ opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1 }}
           className="absolute inset-0"
         >
           <Image
-            src={typeof currentProduct.images?.[0] === 'string' ? currentProduct.images[0] : currentProduct.images?.[0]?.url || ''}
-            alt={currentProduct.name}
+            src={getImg(product.images?.[0])}
+            alt={product.name}
             fill
-            className="object-cover opacity-60"
+            className="object-cover opacity-55"
             priority
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto mt-20">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+
+      {/* Content — bottom left editorial layout */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-20 md:pb-28">
         <AnimatePresence mode="wait">
           <motion.div
-            key={`text-${currentProduct.id}`}
-            initial={{ opacity: 0, y: 20 }}
+            key={`txt-${product._id}`}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.6 }}
           >
-            <span className="text-sm font-semibold uppercase tracking-widest text-gray-300 mb-4 block">
-              Featured Collection
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6" style={{ fontFamily: 'var(--font-montserrat)' }}>
-              {currentProduct.name}
-            </h1>
-            <p className="text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto line-clamp-2">
-              {currentProduct.description}
+            <p
+              className="text-white/40 mb-3"
+              style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.38em' }}
+            >
+              {product.category?.name || 'COLLECTION'}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href={`/product/${currentProduct._id || currentProduct.id}`}>
-                <button className="w-full sm:w-auto bg-white text-black px-8 py-4 font-semibold uppercase tracking-widest text-xs hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                  View Details
+            <h1
+              className="text-white mb-5 max-w-2xl"
+              style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(2.8rem, 7vw, 5.5rem)', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '0.01em' }}
+            >
+              {product.name}
+            </h1>
+            {product.description && (
+              <p
+                className="text-white/55 max-w-sm mb-8 line-clamp-2"
+                style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 300, lineHeight: 1.75 }}
+              >
+                {product.description}
+              </p>
+            )}
+
+            <div className="flex items-center gap-4">
+              <Link href={`/product/${product._id || product.id}`}>
+                <button
+                  className="px-7 py-3 text-white transition-opacity hover:opacity-80"
+                  style={{ border: '0.5px solid rgba(255,255,255,0.5)', fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.28em' }}
+                >
+                  VIEW DETAILS
                 </button>
               </Link>
               <button
                 onClick={() => {
-                  const message = `Hi, I want to order "${currentProduct.name}" from the Hero section.`;
-                  window.open(`https://wa.me/${currentProduct.whatsapp || '14155552671'}?text=${encodeURIComponent(message)}`, '_blank');
+                  const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
+                  window.open(`https://wa.me/${product.whatsapp}?text=${msg}`, '_blank');
                 }}
-                className="w-full sm:w-auto bg-[#25D366] text-white px-8 py-4 font-semibold uppercase tracking-widest text-xs hover:bg-[#1da851] transition-colors flex items-center justify-center gap-2"
+                className="flex items-center gap-2 px-7 py-3 text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#25D366', fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.28em' }}
               >
-                <MessageCircle className="w-4 h-4" /> Order Now
+                <MessageCircle className="w-3.5 h-3.5" />
+                ORDER NOW
               </button>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Slider Dots */}
+      {/* Slide indicators */}
       {heroProducts.length > 1 && (
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-3 z-20">
-          {heroProducts.map((_, idx) => (
+        <div className="absolute bottom-8 right-6 z-20 flex items-center gap-2">
+          {heroProducts.map((_: any, i: number) => (
             <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'}`}
+              key={i}
+              onClick={() => setIdx(i)}
+              className="transition-all"
+              style={{
+                width: i === idx ? '24px' : '6px',
+                height: '0.5px',
+                backgroundColor: i === idx ? 'white' : 'rgba(255,255,255,0.35)',
+              }}
             />
           ))}
         </div>

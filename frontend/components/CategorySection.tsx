@@ -5,6 +5,10 @@ import Image from 'next/image';
 import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
+function getImg(img: any) {
+  return typeof img === 'string' ? img : img?.url || '';
+}
+
 interface Product {
   _id: string;
   id?: string;
@@ -14,86 +18,146 @@ interface Product {
   images: any[];
   category: any;
   whatsapp: string;
+  isFeatured?: boolean;
 }
 
 interface Category {
   _id: string;
   name: string;
   slug: string;
+  description?: string;
 }
 
-export default function CategorySection({ category, products }: { category: Category, products: Product[] }) {
+export default function CategorySection({ category, products }: { category: Category; products: Product[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-16 bg-white border-b border-gray-50 last:border-0">
+    <section className="py-20" style={{ backgroundColor: '#f5f3ee', borderBottom: '0.5px solid rgba(10,10,10,0.07)' }}>
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-end mb-10">
+
+        {/* Header */}
+        <div className="flex items-end justify-between mb-12">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2 block">Collection</span>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-montserrat)' }}>
+            <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '8px', letterSpacing: '0.38em', color: '#888', marginBottom: '8px' }}>
+              COLLECTION
+            </p>
+            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', fontWeight: 300, fontStyle: 'italic', color: '#0a0a0a', lineHeight: 1.1 }}>
               {category.name}
             </h2>
           </div>
-          <Link href={`/category/${category.slug}`}>
-            <span className="text-sm font-semibold uppercase tracking-widest hover:underline cursor-pointer text-gray-900">
-              Explore All
-            </span>
+          <Link
+            href={`/category/${category.slug}`}
+            className="nav-link hidden sm:inline-block"
+            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#0a0a0a' }}
+          >
+            EXPLORE ALL →
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product, index) => (
-            <div key={product._id || product.id} className="group flex flex-col">
-              <Link href={`/product/${product._id || product.id}`} className="flex-1">
-                <div className="relative aspect-[4/5] bg-gray-100 mb-4 overflow-hidden rounded-sm">
-                  {((typeof product.images?.[0] === 'string' && product.images[0]) || (product.images?.[0]?.url)) ? (
+        {/* Product grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.slice(0, 4).map((product, i) => (
+            <motion.div
+              key={product._id || product.id}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.08 }}
+              className="group"
+              style={{ transition: 'transform 220ms ease' }}
+              onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+              onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
+            >
+              <Link href={`/product/${product._id || product.id}`} className="block">
+                {/* Image — 4:3 ratio, flat light gray */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{ aspectRatio: '4/5', backgroundColor: '#e8e6e1' }}
+                >
+                  {getImg(product.images?.[0]) ? (
                     <Image
-                      src={typeof product.images?.[0] === 'string' ? product.images[0] : product.images?.[0]?.url || ''}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-400 text-[10px] uppercase font-bold">No Image</div>
+                    src={getImg(product.images[0])}
+                    alt={product.name}
+                    fill
+                    className="object-cover scale-105"
+                    style={{ transition: 'transform 250ms ease' }}
+                  />
+                    ) : (
+                     <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        fontFamily: 'var(--font-cinzel)',
+                        fontSize: '8px',
+                        letterSpacing: '0.2em',
+                        color: '#aaa'
+                      }}
+                    >
+                      NO IMAGE
+                    </div>
                   )}
-                  
-                  {/* WhatsApp Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-6">
-                    <button 
+
+                  {/* WhatsApp slides up from bottom */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0"
+                    style={{ transition: 'transform 220ms ease' }}
+                  >
+                    <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const message = `Hi, I want to order "${product.name}" priced at $${product.price}.`;
-                        window.open(`https://wa.me/${product.whatsapp || '14155552671'}?text=${encodeURIComponent(message)}`, '_blank');
+                        const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
+                        window.open(`https://wa.me/${product.whatsapp}?text=${msg}`, '_blank');
                       }}
-                      className="w-full bg-[#25D366] text-white py-4 font-bold uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 flex items-center justify-center gap-2 hover:bg-[#1da851] shadow-xl"
+                      className="w-full flex items-center justify-center gap-2 py-3 text-white"
+                      style={{ backgroundColor: '#25D366', fontFamily: 'var(--font-cinzel)', fontSize: '8.5px', letterSpacing: '0.22em' }}
                     >
-                      <MessageCircle className="w-4 h-4" /> Order on WhatsApp
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      ORDER ON WHATSAPP
                     </button>
                   </div>
 
-                  {/* Badges */}
-                  {(product as any).isFeatured && (
-                    <div className="absolute top-4 left-4 bg-black text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">
-                      Featured
+                  {product.isFeatured && (
+                    <div
+                      className="absolute top-3 left-3 px-2 py-1 text-white"
+                      style={{ backgroundColor: '#0a0a0a', fontFamily: 'var(--font-cinzel)', fontSize: '7px', letterSpacing: '0.2em' }}
+                    >
+                      FEATURED
                     </div>
                   )}
                 </div>
-                
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold uppercase tracking-tight text-gray-900 line-clamp-1">{product.name}</h3>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-black text-gray-900 font-mono">${product.price}</span>
+
+                {/* Card info */}
+                <div className="pt-3 pb-1">
+                  <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '10px', letterSpacing: '0.1em', color: '#888', marginBottom: '3px' }}>
+                    {product.category?.name || ''}
+                  </p>
+                  <h3 style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '18px', fontWeight: 500, color: '#0a0a0a', lineHeight: 1.2, marginBottom: '6px' }}>
+                    {product.name}
+                  </h3>
+                  <div className="flex items-baseline gap-2">
+                    <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 500, color: '#0a0a0a' }}>
+                      ₹{product.price.toLocaleString()}
+                    </span>
                     {product.mrp > product.price && (
-                      <span className="text-[10px] text-gray-400 line-through font-mono">${product.mrp}</span>
+                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '11px', fontWeight: 300, color: '#888', textDecoration: 'line-through' }}>
+                        ₹{product.mrp.toLocaleString()}
+                      </span>
                     )}
                   </div>
                 </div>
               </Link>
-            </div>
+            </motion.div>
           ))}
+        </div>
+
+        {/* Mobile explore */}
+        <div className="mt-8 sm:hidden">
+          <Link
+            href={`/category/${category.slug}`}
+            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '20px', color: '#0a0a0a' }}
+          >
+            EXPLORE ALL →
+          </Link>
         </div>
       </div>
     </section>

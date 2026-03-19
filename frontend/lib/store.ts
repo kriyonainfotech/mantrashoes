@@ -54,8 +54,8 @@ export const useAppStore = create<AppState>((set, get) => ({
             enabled: true, 
             description: 'Premium luxury footwear for the modern individual.',
             email: 'hello@mantrashoes.com',
-            phone: '+1 (555) 000-0000',
-            address: '123 Luxury Way, Beverly Hills, CA'
+            phone: '+91 74050 40700',
+            address: 'Shop No B-3, Varachha Main Rd, nr. Rise On Plaza, Sarthana Jakat Naka, Nana Varachha, Surat, Gujarat 395013'
           }
         },
         reviews: [
