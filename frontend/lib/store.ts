@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 interface AppState {
   data: any;
@@ -12,10 +13,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   fetchData: async (force = false) => {
     if (get().data && !force) return;
     try {
-      const prodRes = await fetch('http://localhost:5000/api/products/get-products');
+      const prodRes = await fetch(`${API_URL}/api/products/get-products`);
       const products = await prodRes.json();
       
-      const catRes = await fetch('http://localhost:5000/api/categories/get-categories');
+      const catRes = await fetch(`${API_URL}/api/categories/get-categories`);
       const categoriesData = await catRes.json();
       
       // Keep existing structure for sections/theme but update products/categories

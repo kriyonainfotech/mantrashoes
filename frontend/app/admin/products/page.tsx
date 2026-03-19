@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon } from 'lucide-react';
 import DataTable from '@/components/admin/DataTable';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 
 export default function ProductsPage() {
   const { data, fetchData, setData } = useAppStore();
@@ -17,10 +19,10 @@ export default function ProductsPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const prodRes = await fetch('http://localhost:5000/api/products/get-products');
+        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
         const products = await prodRes.json();
 
-        const catRes = await fetch('http://localhost:5000/api/categories/get-categories');
+        const catRes = await fetch(`${API_URL}/api/categories/get-categories`);
         const cats = await catRes.json();
 
         console.log(cats.categories, "cats");
@@ -124,11 +126,11 @@ export default function ProductsPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/products/delete-product/${id}`, {
+      const res = await fetch(`${API_URL}/api/products/delete-product/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        const prodRes = await fetch('http://localhost:5000/api/products/get-products');
+        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
         const products = await prodRes.json();
         setData({ ...data, products });
       }
@@ -165,8 +167,8 @@ export default function ProductsPage() {
       });
 
       const url = isNewProduct
-        ? 'http://localhost:5000/api/products/create-product'
-        : `http://localhost:5000/api/products/update-product/${editingProduct._id}`;
+        ? `${API_URL}/api/products/create-product`
+        : `${API_URL}/api/products/update-product/${editingProduct._id}`;
 
       const method = isNewProduct ? 'POST' : 'PUT';
 
@@ -176,7 +178,7 @@ export default function ProductsPage() {
       });
 
       if (res.ok) {
-        const prodRes = await fetch('http://localhost:5000/api/products/get-products');
+        const prodRes = await fetch(`${API_URL}/api/products/get-products`);
         const products = await prodRes.json();
         setData({ ...data, products });
         setEditingProduct(null);
