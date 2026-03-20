@@ -15,6 +15,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    const contentType = response.headers['content-type'];
+    if (contentType && !contentType.includes('application/json')) {
+      console.error('Expected JSON but received:', response.data);
+      throw new Error(`Expected JSON but received ${contentType}`);
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      const contentType = error.response.headers['content-type'];
+      if (contentType && contentType.includes('text/html')) {
+        console.error('API returned HTML (likely a 404 or error page)');
+        return Promise.reject(new Error(`API Error: Received HTML instead of JSON. Check your API URL: ${error.config.url}`));
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface Category {
   _id: string;
   name: string;

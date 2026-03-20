@@ -14,10 +14,30 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (get().data && !force) return;
     try {
       const prodRes = await fetch(`${API_URL}/products/get-products`);
+      if (!prodRes.ok) {
+        throw new Error(`Failed to fetch products: ${prodRes.status} ${prodRes.statusText}`);
+      }
+      
+      const contentType = prodRes.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await prodRes.text();
+        console.error('Expected JSON but received:', text.substring(0, 100));
+        throw new Error(`Failed to fetch products: Expected JSON but received ${contentType || 'unknown content'}`);
+      }
+      
       const prodData = await prodRes.json();
       const products = prodData.products || prodData || [];
 
       const catRes = await fetch(`${API_URL}/categories/get-categories`);
+      if (!catRes.ok) {
+        throw new Error(`Failed to fetch categories: ${catRes.status} ${catRes.statusText}`);
+      }
+
+      const catContentType = catRes.headers.get("content-type");
+      if (!catContentType || !catContentType.includes("application/json")) {
+        throw new Error(`Failed to fetch categories: Expected JSON but received ${catContentType || 'unknown content'}`);
+      }
+
       const categoriesData = await catRes.json();
       
       // Keep existing structure for sections/theme but update products/categories
@@ -75,7 +95,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         } 
       });
     } catch (error) {
-      console.error('Failed to fetch data', error);
+      console.error('Failed to fetch data:', error);
     }
   },
 }));
