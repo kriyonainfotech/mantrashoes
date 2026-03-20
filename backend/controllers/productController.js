@@ -27,6 +27,29 @@ exports.createProduct = async (req, res) => {
             index: index
         })) : [];
 
+        let parsedVariants = [];
+        if (variants) {
+            try {
+                parsedVariants = typeof variants === 'string' && variants !== "[object Object]" ? JSON.parse(variants) : variants;
+                if (!Array.isArray(parsedVariants)) parsedVariants = [];
+            } catch (e) {
+                console.error("Error parsing variants:", e);
+                parsedVariants = [];
+            }
+        }
+
+        let parsedTags = [];
+        if (tags) {
+            try {
+                // If it looks like a JSON array, parse it. Otherwise, handle as string or array.
+                parsedTags = typeof tags === 'string' && tags.trim().startsWith('[') 
+                    ? JSON.parse(tags) 
+                    : (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t));
+            } catch (e) {
+                parsedTags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t);
+            }
+        }
+
         const product = await Product.create({
             name,
             slug,
@@ -37,13 +60,11 @@ exports.createProduct = async (req, res) => {
             category,
             brand,
             images,
-            variants: variants ? (typeof variants === "string" && variants !== "[object Object]" ? JSON.parse(variants) : variants) : [],
+            variants: parsedVariants,
             material,
             soleMaterial,
             whatsapp,
-            tags: tags
-                ? (Array.isArray(tags) ? tags : tags.split(","))
-                : [],
+            tags: parsedTags,
             isFeatured,
             isActive
         });
@@ -125,6 +146,28 @@ exports.updateProduct = async (req, res) => {
             isActive
         } = req.body;
 
+        let parsedVariants = undefined;
+        if (variants) {
+            try {
+                parsedVariants = typeof variants === 'string' && variants !== "[object Object]" ? JSON.parse(variants) : variants;
+                if (!Array.isArray(parsedVariants)) parsedVariants = [];
+            } catch (e) {
+                console.error("Error parsing variants in update:", e);
+                parsedVariants = [];
+            }
+        }
+
+        let parsedTags = undefined;
+        if (tags) {
+            try {
+                parsedTags = typeof tags === 'string' && tags.trim().startsWith('[') 
+                    ? JSON.parse(tags) 
+                    : (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t));
+            } catch (e) {
+                parsedTags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t);
+            }
+        }
+
         const updateData = {
             name,
             slug,
@@ -133,9 +176,11 @@ exports.updateProduct = async (req, res) => {
             mrp,
             discount,
             category,
+            brand,
+            variants: parsedVariants,
             soleMaterial,
             whatsapp,
-            tags: tags ? (Array.isArray(tags) ? tags : tags.split(",")) : undefined,
+            tags: parsedTags,
             isFeatured,
             isActive
         };

@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { href: '/admin/products', label: 'Products' },
   { href: '/admin/category', label: 'Categories' },
   { href: '/admin/reels', label: 'Reels' },
-  { href: '/admin/settings', label: 'Settings' },
+  // { href: '/admin/settings', label: 'Settings' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

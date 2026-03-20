@@ -184,8 +184,15 @@ export default function ProductsPage() {
         setIsNewProduct(false);
         setImageFiles([]);
       } else {
-        const err = await res.json();
-        alert(err.message || 'Failed to save product');
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const err = await res.json();
+          alert(err.message || 'Failed to save product');
+        } else {
+          const errorText = await res.text();
+          console.error('Server error (non-JSON):', errorText);
+          alert(`Failed to save product: ${res.status} ${res.statusText}`);
+        }
       }
     } catch (error) {
       console.error(error);
