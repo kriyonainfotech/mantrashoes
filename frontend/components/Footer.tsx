@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { MapPin, Phone, Clock, Mail, MessageCircle } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { MAPS_URL } from '@/lib/config';
+
 
 export default function Footer({ data, theme }: { data: any; theme: any }) {
   const { data: storeData } = useAppStore();
@@ -103,7 +105,8 @@ export default function Footer({ data, theme }: { data: any; theme: any }) {
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <a href="https://maps.google.com/?q=Mantra+Shoes+Surat" target="_blank" rel="noopener noreferrer"
+          <a href={`${MAPS_URL}Mantra+Shoes+Surat`} target="_blank" rel="noopener noreferrer"
+
             className="inline-flex items-center gap-2 mt-4 transition-opacity hover:opacity-70"
             style={{ fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)' }}>
             <MapPin className="w-3 h-3" />

@@ -5,6 +5,8 @@ import { useAppStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { MapPin, Phone, Mail, Clock, MessageCircle, ExternalLink } from 'lucide-react';
+import { WHATSAPP_URL, MAPS_URL } from '@/lib/config';
+
 
 export default function ContactPage() {
   const { data, fetchData } = useAppStore();
@@ -40,7 +42,7 @@ export default function ContactPage() {
       icon: <MapPin className="w-5 h-5 flex-shrink-0" style={{ color: '#aaa' }} />,
       label: 'VISIT US',
       value: address,
-      href: 'https://maps.google.com/?q=Mantra+Shoes+Surat',
+      href: `${MAPS_URL}Mantra+Shoes+Surat`,
       linkLabel: 'Get Directions',
     },
     phone && {
@@ -185,7 +187,7 @@ export default function ContactPage() {
           {/* WhatsApp CTA */}
           {whatsapp && (
             <a
-              href={`https://wa.me/${whatsapp}`}
+              href={`${WHATSAPP_URL}/${whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center rounded-full justify-center gap-3 py-4 px-6 text-white transition-all duration-200"
@@ -232,7 +234,7 @@ export default function ContactPage() {
             />
           </div>
           <a
-            href="https://maps.google.com/?q=Mantra+Shoes+Surat"
+            href={`${MAPS_URL}Mantra+Shoes+Surat`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 self-start transition-opacity hover:opacity-60"

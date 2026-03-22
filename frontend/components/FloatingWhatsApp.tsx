@@ -2,6 +2,8 @@
 
 import { MessageCircle } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 export default function FloatingWhatsApp({ productName, size }: { productName?: string; size?: string }) {
   const { data } = useAppStore();
@@ -17,7 +19,8 @@ export default function FloatingWhatsApp({ productName, size }: { productName?: 
   return (
     <>
       <a
-        href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`}
+        href={`${WHATSAPP_URL}/${whatsapp}?text=${encodeURIComponent(message)}`}
+
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center"

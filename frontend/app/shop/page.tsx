@@ -9,6 +9,8 @@ import { MessageCircle, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import ShopFilter from '@/components/ShopFilter';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 function getImg(img: any) {
   return typeof img === 'string' ? img : img?.url || '';
@@ -222,7 +224,8 @@ export default function Shop() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              window.open(`https://wa.me/${product.whatsapp}?text=Hi, I'm interested in the ${product.name}`, '_blank');
+                              window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=Hi, I'm interested in the ${product.name}`, '_blank');
+
                             }}
                             className="w-full flex items-center justify-center gap-2 py-3 text-white"
                             style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}

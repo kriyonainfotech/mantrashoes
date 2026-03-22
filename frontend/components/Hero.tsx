@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 function getImg(img: any) {
   return typeof img === 'string' ? img : img?.url || '';
@@ -85,7 +87,8 @@ export default function Hero({ data, products, theme }: { data: any; products: a
                 </button>
               </Link>
               <button
-                onClick={() => { const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`); window.open(`https://wa.me/${product.whatsapp}?text=${msg}`, '_blank'); }}
+                onClick={() => { const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`); window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${msg}`, '_blank'); }}
+
                 className="flex items-center gap-2 px-7 py-3 text-white transition-opacity hover:opacity-90"
                 style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '13px', fontWeight: 600 }}>
                 <MessageCircle className="w-3.5 h-3.5" />

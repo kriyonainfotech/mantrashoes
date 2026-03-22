@@ -8,6 +8,8 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Image from 'next/image';
 import { MessageCircle, Heart, ChevronDown, Star, ZoomIn } from 'lucide-react';
 import Link from 'next/link';
+import { WHATSAPP_URL } from '@/lib/config';
+
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -68,7 +70,8 @@ function RelatedCard({ product }: { product: any }) {
             <button
               onClick={e => {
                 e.preventDefault(); e.stopPropagation();
-                window.open(`https://wa.me/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`, '_blank');
+                window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`, '_blank');
+
               }}
               className="w-full flex items-center justify-center gap-2 py-3 text-white"
               style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}
@@ -394,7 +397,8 @@ export default function ProductPage() {
             {/* CTA buttons */}
             <div className="flex gap-3 mb-3">
               <button
-                onClick={() => window.open(`https://wa.me/${product.whatsapp}?text=${whatsappMsg}`, '_blank')}
+                onClick={() => window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${whatsappMsg}`, '_blank')}
+
                 className="flex-1 flex items-center justify-center gap-2.5 py-4 text-white"
                 style={{
                   background: '#0fb04a',

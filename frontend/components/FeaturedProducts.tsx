@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 export default function FeaturedProducts({ data, products, theme }: { data: any, products: any[], theme: any }) {
   if (!data?.enabled) return null;
@@ -48,7 +50,8 @@ export default function FeaturedProducts({ data, products, theme }: { data: any,
                     <button 
                       onClick={(e) => {
                         e.preventDefault();
-                        window.open(`https://wa.me/${product.whatsapp}?text=Hi, I'm interested in the ${product.name}`, '_blank');
+                        window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=Hi, I'm interested in the ${product.name}`, '_blank');
+
                       }}
                       className="bg-[#25D366] text-white px-6 py-3 font-semibold uppercase text-xs tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all flex items-center gap-2 hover:bg-[#1da851]"
                     >

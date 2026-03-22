@@ -12,6 +12,7 @@ import {
 } from '@/lib/redux/slices/categorySlice';
 import { Category } from '@/lib/api/categoryService';
 import DataTable, { Column } from '@/components/admin/DataTable';
+import { toast } from 'react-hot-toast';
 
 export default function CategoriesPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -64,8 +65,10 @@ export default function CategoriesPage() {
 
       setIsModalOpen(false);
       setEditingCategory(null);
-    } catch (error) {
+      toast.success(editingCategory ? 'Category updated' : 'Category created');
+    } catch (error: any) {
       console.error('Error saving category:', error);
+      toast.error(error.message || 'Failed to save category');
     }
   };
 
@@ -73,8 +76,10 @@ export default function CategoriesPage() {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
         await dispatch(deleteCategory(id)).unwrap();
-      } catch (error) {
+        toast.success('Category deleted');
+      } catch (error: any) {
         console.error('Error deleting category:', error);
+        toast.error(error.message || 'Failed to delete category');
       }
     }
   };

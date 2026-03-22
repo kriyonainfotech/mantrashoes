@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '@/lib/config';
+import { toast } from 'react-hot-toast';
+
 
 interface Reel {
   _id: string;
@@ -22,7 +24,6 @@ export default function AdminReelsPage() {
   const [preview, setPreview] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [msg, setMsg] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ caption: '', order: '', isActive: true });
   const fileRef = useRef<HTMLInputElement>(null);
@@ -38,7 +39,6 @@ export default function AdminReelsPage() {
 
   useEffect(() => { fetchReels(); }, []);
 
-  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -49,7 +49,7 @@ export default function AdminReelsPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return flash('Select a video file first');
+    if (!file) return toast.error('Select a video file first');
     setUploading(true);
     setProgress(0);
 
@@ -69,10 +69,10 @@ export default function AdminReelsPage() {
         };
         xhr.onload = () => {
           const d = JSON.parse(xhr.responseText);
-          if (d.success) { flash('Reel uploaded'); resolve(); }
-          else { flash(d.message || 'Upload failed'); reject(); }
+          if (d.success) { toast.success('Reel uploaded'); resolve(); }
+          else { toast.error(d.message || 'Upload failed'); reject(); }
         };
-        xhr.onerror = () => { flash('Network error'); reject(); };
+        xhr.onerror = () => { toast.error('Network error'); reject(); };
         xhr.send(formData);
       });
       setFile(null);
@@ -97,24 +97,30 @@ export default function AdminReelsPage() {
       }),
     });
     const d = await res.json();
-    if (d.success) { flash('Updated'); setEditId(null); fetchReels(); }
-    else flash(d.message || 'Error');
+    if (d.success) { toast.success('Updated'); setEditId(null); fetchReels(); }
+    else toast.error(d.message || 'Error');
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this reel? This also removes it from Cloudinary.')) return;
     const res = await fetch(`${API_URL}/reels/${id}`, { method: 'DELETE', headers: authHeaders });
     const d = await res.json();
-    if (d.success) { flash('Deleted'); fetchReels(); }
+    if (d.success) { toast.success('Deleted'); fetchReels(); }
+    else toast.error(d.message || 'Failed to delete');
   };
 
   const toggleActive = async (r: Reel) => {
-    await fetch(`${API_URL}/reels/${r._id}`, {
+    const res = await fetch(`${API_URL}/reels/${r._id}`, {
       method: 'PUT',
       headers: { ...authHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ isActive: !r.isActive }),
     });
-    fetchReels();
+    if (res.ok) {
+      toast.success(r.isActive ? 'Reel hidden' : 'Reel activated');
+      fetchReels();
+    } else {
+      toast.error('Failed to toggle status');
+    }
   };
 
   return (
@@ -126,11 +132,6 @@ export default function AdminReelsPage() {
         </h1>
       </div>
 
-      {msg && (
-        <div style={{ padding: '12px 18px', marginBottom: 16, border: '0.5px solid rgba(10,10,10,0.2)', fontFamily: 'var(--font-dm-sans)', fontSize: 15 }}>
-          {msg}
-        </div>
-      )}
 
       {/* Upload form */}
       <form onSubmit={handleUpload} style={{ border: '0.5px solid rgba(10,10,10,0.15)', padding: 24, marginBottom: 32, backgroundColor: '#fff' }}>

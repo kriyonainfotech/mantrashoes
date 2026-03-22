@@ -5,6 +5,8 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { setAuth } from '@/lib/redux/slices/authSlice';
 import { motion } from 'motion/react';
+import { API_URL } from '@/lib/config';
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,7 +23,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -31,12 +34,14 @@ export default function LoginPage() {
 
       if (response.ok) {
         dispatch(setAuth({ user: data.user, token: data.token }));
+        toast.success('Access Granted');
         router.push('/admin');
       } else {
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
       setError('Connection failed. Please check if the backend is running.');
+      toast.error('Connection failed');
     } finally {
       setIsLoading(false);
     }

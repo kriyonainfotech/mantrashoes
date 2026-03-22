@@ -11,7 +11,8 @@ import { MessageCircle, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ShopFilter from '@/components/ShopFilter';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { API_URL, WHATSAPP_URL } from '@/lib/config';
+
 
 function getImg(img: any) {
   return typeof img === 'string' ? img : img?.url || '';
@@ -81,7 +82,7 @@ export default function CategoryPage() {
 
     // Filter by Sizes
     if (filters.sizes.length > 0) {
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.variants?.some((v: any) => filters.sizes.includes(v.size))
       );
     }
@@ -143,7 +144,7 @@ export default function CategoryPage() {
 
       {/* ── Mobile Filter Toggle ── */}
       <div className="lg:hidden sticky top-[80px] z-30 bg-[#F8F5EF]/80 backdrop-blur-md border-b border-black/5 px-6 py-4">
-        <button 
+        <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider"
           style={{ fontFamily: 'var(--font-nunito)' }}
@@ -155,22 +156,22 @@ export default function CategoryPage() {
 
       {/* ── Main Layout ── */}
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-12 flex gap-12">
-        
+
         {/* SIDEBAR (Desktop) */}
         <div className="hidden lg:block w-72 flex-shrink-0">
-          <ShopFilter 
+          <ShopFilter
             categories={[]} // Empty because we are locked to this category
             allProducts={baseProducts}
             activeFilters={filters}
             onChange={setFilters}
             isOpen={false}
-            onClose={() => {}}
+            onClose={() => { }}
           />
         </div>
 
         {/* SIDEBAR (Mobile Overlay) */}
         <div className="lg:hidden">
-          <ShopFilter 
+          <ShopFilter
             categories={[]}
             allProducts={baseProducts}
             activeFilters={filters}
@@ -224,7 +225,8 @@ export default function CategoryPage() {
                             e.preventDefault();
                             e.stopPropagation();
                             window.open(
-                              `https://wa.me/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`,
+                              `${WHATSAPP_URL}/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`,
+
                               '_blank'
                             );
                           }}
@@ -259,13 +261,13 @@ export default function CategoryPage() {
               ))}
             </AnimatePresence>
           </div>
-          
+
           {filteredProducts.length === 0 && (
             <div className="py-24 text-center">
               <p style={{ fontFamily: 'var(--font-lora)', fontSize: '18px', fontStyle: 'italic', color: '#999' }}>
                 No products match these filters in this category.
               </p>
-              <button 
+              <button
                 onClick={() => {
                   const max = Math.ceil(Math.max(...(baseProducts || []).map((p: any) => p.price), 0) / 1000) * 1000 || 10000;
                   setFilters({ category: category._id, priceRange: [0, max], sort: 'newest', sizes: [], search: '' });

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '@/lib/config';
+
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ products: 0, categories: 0, activeProducts: 0, featuredProducts: 0 });

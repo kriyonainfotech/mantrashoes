@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon } from 'lucide-react';
 import DataTable from '@/components/admin/DataTable';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '@/lib/config';
+
+
 
 
 export default function ProductsPage() {
@@ -132,10 +135,13 @@ export default function ProductsPage() {
         const prodRes = await fetch(`${API_URL}/products/get-products`);
         const products = await prodRes.json();
         setData({ ...(data || {}), products: products.products || products || [] });
+        toast.success('Product deleted successfully');
+      } else {
+        throw new Error('Failed to delete product');
       }
     } catch (error) {
       console.error(error);
-      alert('Failed to delete product');
+      toast.error('Failed to delete product');
     }
     setSaving(false);
   };
@@ -183,20 +189,21 @@ export default function ProductsPage() {
         setEditingProduct(null);
         setIsNewProduct(false);
         setImageFiles([]);
+        toast.success(isNewProduct ? 'Product created successfully' : 'Product updated successfully');
       } else {
         const contentType = res.headers.get('content-type');
+        let errorMsg = 'Failed to save product';
         if (contentType && contentType.includes('application/json')) {
-          const err = await res.json();
-          alert(err.message || 'Failed to save product');
+          const errData = await res.json();
+          errorMsg = errData.message || errorMsg;
         } else {
-          const errorText = await res.text();
-          console.error('Server error (non-JSON):', errorText);
-          alert(`Failed to save product: ${res.status} ${res.statusText}`);
+          errorMsg = await res.text();
         }
+        throw new Error(errorMsg);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to save product');
+      toast.error(error.message || 'Failed to save product');
     }
     setSaving(false);
   };

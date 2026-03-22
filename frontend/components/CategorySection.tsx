@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 function getImg(img: any) {
   return typeof img === 'string' ? img : img?.url || '';
@@ -118,7 +120,8 @@ export default function CategorySection({ category, products }: { category: Cate
                         e.preventDefault();
                         e.stopPropagation();
                         const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
-                        window.open(`https://wa.me/${product.whatsapp}?text=${msg}`, '_blank');
+                        window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${msg}`, '_blank');
+
                       }}
                       className="w-full flex items-center justify-center gap-2 py-3 text-white"
                       style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}

@@ -5,7 +5,9 @@ import { useAppStore } from '@/lib/store';
 import { Save, Plus, Trash2, Upload, X, ImageIcon, Loader2, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '@/lib/config';
+import { toast } from 'react-hot-toast';
+
 
 // ─── Image Upload Button ──────────────────────────────────────────────────────
 function ImageUpload({
@@ -35,10 +37,10 @@ function ImageUpload({
       if (data.success) {
         onUploaded(data.url);
       } else {
-        setError(data.message || 'Upload failed');
+        toast.error(data.message || 'Upload failed');
       }
     } catch (e) {
-      setError('Upload failed. Check your connection.');
+      toast.error('Upload failed. Check your connection.');
     }
     setUploading(false);
   };
@@ -223,7 +225,6 @@ function Field({ label, value, onChange, textarea, rows, placeholder }: any) {
 export default function SettingsPage() {
   const { data, fetchData, setData } = useAppStore();
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -251,13 +252,12 @@ export default function SettingsPage() {
       });
       if (res.ok) {
         setData(formData);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+        toast.success('Settings saved successfully');
       } else {
-        alert('Failed to save settings');
+        toast.error('Failed to save settings');
       }
     } catch {
-      alert('Failed to save settings');
+      toast.error('Failed to save settings');
     }
     setSaving(false);
   };
@@ -282,8 +282,6 @@ export default function SettingsPage() {
         >
           {saving
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
-            : saved
-            ? <><CheckCircle className="w-4 h-4 text-green-400" /> Saved!</>
             : <><Save className="w-4 h-4" /> Save Changes</>
           }
         </button>

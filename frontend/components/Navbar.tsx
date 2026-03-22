@@ -6,6 +6,8 @@ import { Menu, X, MessageCircle, MapPin, Phone, ChevronRight } from 'lucide-reac
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
+import { WHATSAPP_URL } from '@/lib/config';
+
 
 interface CategoryNode {
   _id: string;
@@ -231,7 +233,8 @@ export default function Navbar({ theme }: { theme: any }) {
           {/* WhatsApp — desktop */}
           {whatsapp && (
             <a
-              href={`https://wa.me/${whatsapp}`}
+              href={`${WHATSAPP_URL}/${whatsapp}`}
+
               target="_blank" rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 px-4 py-2 text-white flex-shrink-0 rounded-full"
               style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 600, transition: 'transform 200ms ease' }}
@@ -246,8 +249,9 @@ export default function Navbar({ theme }: { theme: any }) {
           {/* Mobile: WhatsApp + hamburger */}
           <div className="md:hidden flex items-center gap-2">
             {whatsapp && (
-              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
+              <a href={`${WHATSAPP_URL}/${whatsapp}`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center w-8 h-8 rounded-full" style={{ background: '#0fb04a' }}>
+
                 <MessageCircle className="w-4 h-4 text-white" />
               </a>
             )}
