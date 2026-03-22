@@ -31,72 +31,84 @@ interface Category {
 export default function CategorySection({ category, products }: { category: Category; products: Product[] }) {
   if (products.length === 0) return null;
 
-  return (
-    <section className="py-20" style={{ backgroundColor: '#f5f3ee', borderBottom: '0.5px solid rgba(10,10,10,0.07)' }}>
-      <div className="max-w-7xl mx-auto px-6">
+  // Show up to 8 products per category
+  const displayProducts = products.slice(0, 8);
 
-        {/* Header */}
-        <div className="flex items-end justify-between mb-12">
+  return (
+    <section
+      className="py-10"
+      style={{ backgroundColor: '#F8F5EF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+
+        {/* Header — compact */}
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '8px', letterSpacing: '0.38em', color: '#888', marginBottom: '8px' }}>
-              COLLECTION
+            <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#999', marginBottom: '4px' }}>
+              Collection
             </p>
-            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', fontWeight: 300, fontStyle: 'italic', color: '#0a0a0a', lineHeight: 1.1 }}>
+            <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.1 }}>
               {category.name}
             </h2>
           </div>
           <Link
             href={`/category/${category.slug}`}
-            className="nav-link hidden sm:inline-block"
-            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#0a0a0a' }}
+            className="nav-link hidden sm:inline-flex items-center gap-1"
+            style={{ fontFamily: 'var(--font-nunito)', fontSize: '13px', fontWeight: 600, color: '#1A1A1A' }}
           >
-            EXPLORE ALL →
+            View All →
           </Link>
         </div>
 
-        {/* Product grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((product, i) => (
+        {/* Product grid — 2 cols mobile, 3 cols md, 4 cols lg, no wasted space */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          {displayProducts.map((product, i) => (
             <motion.div
               key={product._id || product.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: i * 0.08 }}
+              transition={{ duration: 0.35, delay: i * 0.05 }}
               className="group"
-              style={{ transition: 'transform 220ms ease' }}
-              onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
-              onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               <Link href={`/product/${product._id || product.id}`} className="block">
-                {/* Image — 4:3 ratio, flat light gray */}
+
+                {/* Image container — taller ratio, bigger visual presence */}
                 <div
                   className="relative overflow-hidden"
-                  style={{ aspectRatio: '4/5', backgroundColor: '#e8e6e1' }}
+                  style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
                 >
                   {getImg(product.images?.[0]) ? (
                     <Image
-                    src={getImg(product.images[0])}
-                    alt={product.name}
-                    fill
-                    className="object-cover scale-105"
-                    style={{ transition: 'transform 250ms ease' }}
-                  />
-                    ) : (
-                     <div
-                      className="absolute inset-0 flex items-center justify-center"
-                      style={{
-                        fontFamily: 'var(--font-cinzel)',
-                        fontSize: '8px',
-                        letterSpacing: '0.2em',
-                        color: '#aaa'
-                      }}
-                    >
-                      NO IMAGE
+                      src={getImg(product.images[0])}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ fontFamily: 'var(--font-nunito)', fontSize: '11px', fontWeight: 500, color: '#bbb', letterSpacing: '0.1em' }}>
+                      No Image
                     </div>
                   )}
 
-                  {/* WhatsApp slides up from bottom */}
+                  {/* Featured badge */}
+                  {product.isFeatured && (
+                    <div className="absolute top-2 left-2 px-2 py-0.5"
+                      style={{ backgroundColor: '#1A1A1A', fontFamily: 'var(--font-nunito)', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
+                      Featured
+                    </div>
+                  )}
+
+                  {/* Discount badge */}
+                  {product.mrp > product.price && (
+                    <div className="absolute top-2 right-2 px-2 py-0.5"
+                      style={{ backgroundColor: '#E63946', fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 700, color: '#fff' }}>
+                      {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                    </div>
+                  )}
+
+                  {/* WhatsApp overlay — slides up on hover */}
                   <div
                     className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0"
                     style={{ transition: 'transform 220ms ease' }}
@@ -109,37 +121,31 @@ export default function CategorySection({ category, products }: { category: Cate
                         window.open(`https://wa.me/${product.whatsapp}?text=${msg}`, '_blank');
                       }}
                       className="w-full flex items-center justify-center gap-2 py-3 text-white"
-                      style={{ backgroundColor: '#25D366', fontFamily: 'var(--font-cinzel)', fontSize: '8.5px', letterSpacing: '0.22em' }}
+                      style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      ORDER ON WHATSAPP
+                      <MessageCircle className="w-4 h-4" />
+                      Order on WhatsApp
                     </button>
                   </div>
-
-                  {product.isFeatured && (
-                    <div
-                      className="absolute top-3 left-3 px-2 py-1 text-white"
-                      style={{ backgroundColor: '#0a0a0a', fontFamily: 'var(--font-cinzel)', fontSize: '7px', letterSpacing: '0.2em' }}
-                    >
-                      FEATURED
-                    </div>
-                  )}
                 </div>
 
-                {/* Card info */}
-                <div className="pt-3 pb-1">
-                  <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '10px', letterSpacing: '0.1em', color: '#888', marginBottom: '3px' }}>
-                    {product.category?.name || ''}
-                  </p>
-                  <h3 style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '18px', fontWeight: 500, color: '#0a0a0a', lineHeight: 1.2, marginBottom: '6px' }}>
+                {/* Card info — compact and tight */}
+                <div className="pt-2.5 pb-1">
+                  {product.category?.name && (
+                    <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#999', marginBottom: '2px' }}>
+                      {product.category.name}
+                    </p>
+                  )}
+                  <h3 style={{ fontFamily: 'var(--font-nunito)', fontSize: '14px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, marginBottom: '5px' }}
+                    className="line-clamp-2">
                     {product.name}
                   </h3>
                   <div className="flex items-baseline gap-2">
-                    <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 500, color: '#0a0a0a' }}>
+                    <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 700, color: '#1A1A1A' }}>
                       ₹{product.price.toLocaleString()}
                     </span>
                     {product.mrp > product.price && (
-                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '11px', fontWeight: 300, color: '#888', textDecoration: 'line-through' }}>
+                      <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 400, color: '#aaa', textDecoration: 'line-through' }}>
                         ₹{product.mrp.toLocaleString()}
                       </span>
                     )}
@@ -150,13 +156,13 @@ export default function CategorySection({ category, products }: { category: Cate
           ))}
         </div>
 
-        {/* Mobile explore */}
-        <div className="mt-8 sm:hidden">
+        {/* Mobile — explore all */}
+        <div className="mt-5 sm:hidden">
           <Link
             href={`/category/${category.slug}`}
-            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '20px', color: '#0a0a0a' }}
+            style={{ fontFamily: 'var(--font-nunito)', fontSize: '14px', fontWeight: 600, color: '#1A1A1A' }}
           >
-            EXPLORE ALL →
+            View All →
           </Link>
         </div>
       </div>

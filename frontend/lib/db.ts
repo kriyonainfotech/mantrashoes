@@ -50,9 +50,10 @@ export const defaultData = {
       title: "Join the Mantra Club"
     },
     footer: {
-      brandDescription: "Premium sports footwear for the modern athlete.",
-      backgroundColor: "#000000",
-      textColor: "#FFFFFF"
+      description: "Authentic, comfortable footwear trusted by Surat families for decades.",
+      phone: "+91 74050 40700",
+      address: "Shop No B-3, Varachha Main Rd, Sarthana Jakat Naka, Nana Varachha, Surat",
+      email: "hello@mantrashoes.com",
     },
     shopHeader: {
       title: "ALL PRODUCTS",

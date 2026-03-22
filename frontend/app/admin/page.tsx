@@ -63,44 +63,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border-thin overflow-hidden">
-          <div className="px-6 py-4 border-b border-ink/5 flex items-center justify-between">
-            <h2 className="font-bebas text-xl tracking-wider">System Activity</h2>
-            <button className="text-[12px] font-black text-ink/40 hover:text-ink uppercase tracking-widest">Full Log</button>
-          </div>
-          <div className="divide-y divide-ink/[0.03]">
-            {[
-              { msg: 'Global inventory synchronized with Cloudinary', time: '12m ago', type: 'System' },
-              { msg: 'New membership approved: Sarah Jenkins', time: '1h ago', type: 'Audit' },
-              { msg: 'Theme profile updated to "Editorial Premium"', time: '3h ago', type: 'Design' }
-            ].map((log, i) => (
-              <div key={i} className="px-6 py-4 flex justify-between items-center group hover:bg-cream/20 transition-colors">
-                <div className="flex items-center gap-4">
-                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-ink/5 group-hover:bg-ink group-hover:text-cream transition-colors">{log.type}</span>
-                  <span className="text-sm font-medium tracking-tight text-ink/80">{log.msg}</span>
-                </div>
-                <span className="text-[10px] text-ink/30 font-bold uppercase tracking-widest">{log.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="bg-ink text-cream p-10 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
-            <h1 className="text-[10vw] font-bebas">MANTRA</h1>
-          </div>
-          <div className="relative z-10">
-            <h2 className="font-bebas text-3xl mb-4 tracking-widest">Mantra <br /> <span className="italic-serif text-2xl lowercase opacity-60">Intelligence</span></h2>
-            <p className="text-sm leading-relaxed opacity-70 font-dm-sans">
-              Algorithms are currently optimizing product placements based on customer interaction patterns.
-            </p>
-          </div>
-          <button className="relative z-10 mt-8 border border-cream/20 py-3 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-cream hover:text-ink transition-all">
-            Open Analytics
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

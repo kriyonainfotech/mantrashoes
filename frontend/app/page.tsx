@@ -11,6 +11,7 @@ import Reviews from '@/components/Reviews';
 import Footer from '@/components/Footer';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import InstagramReels from '@/components/InstagramReels';
+import InstagramGallery from '@/components/InstagramGallery';
 
 export default function Home() {
   const { data, fetchData } = useAppStore();
@@ -19,13 +20,13 @@ export default function Home() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f3ee' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F8F5EF' }}>
         <div className="flex flex-col items-center gap-4">
           <div
-            className="w-10 h-10 rounded-full border-t-transparent animate-spin"
-            style={{ border: '0.5px solid #0a0a0a', borderTopColor: 'transparent' }}
+            className="w-10 h-10 rounded-full animate-spin"
+            style={{ border: '1.5px solid #1A1A1A', borderTopColor: 'transparent' }}
           />
-          <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.35em', color: '#888' }}>
+          <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', color: '#aaa' }}>
             LOADING
           </p>
         </div>
@@ -33,42 +34,63 @@ export default function Home() {
     );
   }
 
-  const activeCategories = (data.categories?.filter((c: any) => c.isActive) || []);
+  // Only show top-level categories (no parent) that are active
+  const activeCategories = (data.categories || []).filter(
+    (c: any) => c.isActive && !c.parent
+  );
+
+  const hero = data.sections?.hero;
+  const brandStory = data.sections?.brandStory;
+  const reviews = data.sections?.reviews;
+  const instagram = data.sections?.instagram;
 
   return (
-    <main style={{ backgroundColor: '#f5f3ee' }}>
+    <main style={{ backgroundColor: '#F8F5EF' }}>
       {/* 1. Navbar */}
       <Navbar theme={data.theme} />
 
-      {/* 2. Hero */}
-      <Hero data={data.sections.hero} products={data.products} theme={data.theme} />
+      {/* 2. Hero — uses title/subtitle/image from Settings → Hero Section */}
+      {hero?.enabled !== false && (
+        <Hero data={hero} products={data.products} theme={data.theme} />
+      )}
 
       {/* 3. Marquee Strip */}
       <MarqueeStrip />
 
-      {/* 4. Category Sections */}
+      {/* 4. Category Sections — one per top-level active category */}
       {activeCategories.map((category: any) => {
         const categoryProducts = (data.products || []).filter(
-          (p: any) => p.isActive !== false && (p.category?._id === category._id || p.category === category._id)
+          (p: any) =>
+            p.isActive !== false &&
+            (p.category?._id === category._id || p.category === category._id)
         );
         return (
           <CategorySection key={category._id} category={category} products={categoryProducts} />
         );
       })}
 
-      {/* 5. Instagram Reels */}
+      {/* 5. Brand Story — uses title/description/image from Settings → Brand Story Section */}
+      {brandStory?.enabled !== false && (
+        <BrandStory data={brandStory} theme={data.theme} />
+      )}
+
+
+      {/* 6. Instagram Photo Gallery — images uploaded from Settings */}
+      <InstagramGallery data={instagram} />
+
+      {/* 7. Instagram Reels (video reels from backend) */}
       <InstagramReels />
 
-      {/* 6. Brand Story */}
-      <BrandStory data={data.sections.brandStory} theme={data.theme} />
 
-      {/* 6. Testimonials */}
-      <Reviews data={data.sections.reviews} reviews={data.reviews} theme={data.theme} />
+      {/* 7. Customer Reviews — uses reviews array + title from Settings → Reviews Section */}
+      {reviews?.enabled !== false && (
+        <Reviews data={reviews} reviews={data.reviews} theme={data.theme} />
+      )}
 
-      {/* 7. Footer */}
-      <Footer data={data.sections.footer} theme={data.theme} />
+      {/* 8. Footer */}
+      <Footer data={data.sections?.footer} theme={data.theme} />
 
-      {/* Always visible floating WhatsApp */}
+      {/* Floating WhatsApp button */}
       <FloatingWhatsApp />
     </main>
   );

@@ -1,49 +1,41 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ─────────────────────────────────────────────────── */
 @theme {
-  --font-cinzel: var(--font-cinzel);
-  --font-cormorant: var(--font-cormorant);
-  --font-dm-sans: var(--font-dm-sans);
-  --color-cream: #f5f3ee;
-  --color-ink: #0a0a0a;
-  --color-muted: #888888;
-  --color-wa: #25D366;
+  --font-playfair: var(--font-playfair);
+  --font-lora: var(--font-lora);
+  --font-nunito: var(--font-nunito);
+
+  /* Clean Black + Warm Ivory — respects the B&W logo */
+  --color-ivory:  #F8F5EF;   /* warm off-white background */
+  --color-ink:    #1A1A1A;   /* clean near-black text */
+  --color-muted:  #777777;   /* medium grey for secondary text */
+  --color-border: rgba(0,0,0,0.1); /* subtle dark border */
+  --color-wa:      #0fb04a;  /* User's Preferred Green */
 }
 
 @layer base {
   :root {
-    --cream: #f5f3ee;
-    --ink: #0a0a0a;
-    --muted: #888888;
+    --ivory:  #F8F5EF;
+    --ink:    #1A1A1A;
+    --muted:  #777777;
   }
 
   body {
-    background-color: #f5f3ee;
-    color: #0a0a0a;
-    font-family: var(--font-dm-sans), sans-serif;
-    font-weight: 300;
+    background-color: #F8F5EF;
+    color: #1A1A1A;
+    font-family: var(--font-nunito), sans-serif;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Hairline border utility */
-.border-hair {
-  border-width: 0.5px;
-}
+/* ─── Typography Utilities ──────────────────────────────────────────── */
+.font-playfair { font-family: var(--font-playfair), serif; }
+.font-lora     { font-family: var(--font-lora), serif; }
+.font-nunito   { font-family: var(--font-nunito), sans-serif; }
 
-/* Cinzel headings */
-.font-cinzel {
-  font-family: var(--font-cinzel), serif;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-}
-
-/* Cormorant italic */
-.font-cormorant {
-  font-family: var(--font-cormorant), serif;
-}
-
-/* Underline slide hover */
+/* ─── Nav underline hover — clean black ────────────────────────────── */
 .nav-link {
   position: relative;
   display: inline-block;
@@ -51,18 +43,19 @@
 .nav-link::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: -3px;
   left: 0;
   width: 0;
-  height: 0.5px;
-  background: #0a0a0a;
+  height: 2px;
+  background: #1A1A1A;
   transition: width 0.3s ease;
+  border-radius: 2px;
 }
 .nav-link:hover::after {
   width: 100%;
 }
 
-/* Refined scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--cream); }
-::-webkit-scrollbar-thumb { background: #ccc; }
+/* ─── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #F8F5EF; }
+::-webkit-scrollbar-thumb { background: #BBBBBB; border-radius: 4px; }

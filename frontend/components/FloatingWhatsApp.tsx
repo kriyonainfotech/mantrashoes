@@ -21,13 +21,13 @@ export default function FloatingWhatsApp({ productName, size }: { productName?: 
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center"
-        style={{ width: '52px', height: '52px', backgroundColor: '#25D366', borderRadius: '50%' }}
+        style={{ width: '52px', height: '52px', backgroundColor: '#0fb04a', borderRadius: '50%', boxShadow: '0 4px 18px rgba(7,94,84,0.45)' }}
         aria-label="Chat on WhatsApp"
       >
         {/* Pulse ring */}
         <span
           className="absolute inset-0 rounded-full"
-          style={{ backgroundColor: '#25D366', animation: 'wa-pulse 2.2s ease-out infinite' }}
+          style={{ backgroundColor: '#0fb04a', animation: 'wa-pulse 2.2s ease-out infinite', opacity: 0.6 }}
         />
         <MessageCircle className="relative z-10 w-6 h-6 text-white" />
       </a>

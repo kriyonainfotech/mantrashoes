@@ -71,7 +71,7 @@ function RelatedCard({ product }: { product: any }) {
                 window.open(`https://wa.me/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`, '_blank');
               }}
               className="w-full flex items-center justify-center gap-2 py-3 text-white"
-              style={{ backgroundColor: '#25D366', fontFamily: 'var(--font-cinzel)', fontSize: '8.5px', letterSpacing: '0.22em' }}
+              style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}
             >
               <MessageCircle className="w-3.5 h-3.5" /> ORDER ON WHATSAPP
             </button>
@@ -397,10 +397,10 @@ export default function ProductPage() {
                 onClick={() => window.open(`https://wa.me/${product.whatsapp}?text=${whatsappMsg}`, '_blank')}
                 className="flex-1 flex items-center justify-center gap-2.5 py-4 text-white"
                 style={{
-                  backgroundColor: '#25D366',
-                  fontFamily: 'var(--font-dm-sans)',
+                  background: '#0fb04a',
+                  fontFamily: 'var(--font-nunito)',
                   fontSize: '14px',
-                  fontWeight: 500,
+                  fontWeight: 600,
                   letterSpacing: '0.04em',
                   transition: 'transform 200ms ease',
                 }}
@@ -439,9 +439,7 @@ export default function ProductPage() {
                   Wipe clean with a dry cloth. Store in a cool, dry place away from direct sunlight.
                 </p>
               </AccordionItem>
-              <AccordionItem title="SHIPPING & RETURNS">
-                <p>Free shipping on orders above ₹999. Delivered within 3–7 business days. Easy 7-day returns on unworn items in original packaging.</p>
-              </AccordionItem>
+
             </div>
           </motion.div>
         </div>

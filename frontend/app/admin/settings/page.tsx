@@ -1,25 +1,245 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
-import { Save, Plus, Trash2 } from 'lucide-react';
+import { Save, Plus, Trash2, Upload, X, ImageIcon, Loader2, CheckCircle } from 'lucide-react';
+import Image from 'next/image';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// ─── Image Upload Button ──────────────────────────────────────────────────────
+function ImageUpload({
+  label,
+  currentUrl,
+  onUploaded,
+  hint,
+}: {
+  label: string;
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+  hint?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFile = async (file: File) => {
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const form = new FormData();
+      form.append('image', file);
+      const res = await fetch(`${API_URL}/settings/upload-image`, { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.success) {
+        onUploaded(data.url);
+      } else {
+        setError(data.message || 'Upload failed');
+      }
+    } catch (e) {
+      setError('Upload failed. Check your connection.');
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
+      {hint && <p className="text-xs text-gray-400 mb-3">{hint}</p>}
+
+      {/* Preview */}
+      {currentUrl && (
+        <div className="relative mb-3 inline-block">
+          <img src={currentUrl} alt="Preview" className="h-28 object-cover rounded-lg border border-gray-200" />
+          <button
+            onClick={() => onUploaded('')}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
+      {/* Upload button */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+        >
+          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+          {uploading ? 'Uploading...' : currentUrl ? 'Change Image' : 'Upload Image'}
+        </button>
+        {currentUrl && !uploading && <CheckCircle className="w-4 h-4 text-green-500" />}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+        />
+      </div>
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+// ─── Gallery Upload (multiple images) ────────────────────────────────────────
+function GalleryUpload({
+  images,
+  onChange,
+}: {
+  images: string[];
+  onChange: (imgs: string[]) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const form = new FormData();
+    form.append('image', file);
+    const res = await fetch(`${API_URL}/settings/upload-image`, { method: 'POST', body: form });
+    const data = await res.json();
+    return data.success ? data.url : null;
+  };
+
+  const handleFiles = async (files: FileList) => {
+    setUploading(true);
+    setError('');
+    const urls: string[] = [];
+    for (const file of Array.from(files)) {
+      const url = await uploadFile(file);
+      if (url) urls.push(url);
+    }
+    if (urls.length) onChange([...images, ...urls]);
+    else setError('Upload failed for some files.');
+    setUploading(false);
+  };
+
+  const remove = (idx: number) => {
+    const updated = [...images];
+    updated.splice(idx, 1);
+    onChange(updated);
+  };
+
+  return (
+    <div>
+      {/* Grid preview */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mb-4">
+        {images.map((url, i) => (
+          <div key={i} className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+            <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+            <button
+              onClick={() => remove(i)}
+              className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+            <span className="absolute bottom-0 left-0 right-0 text-center text-white text-xs py-0.5 bg-black/40">
+              {i + 1}
+            </span>
+          </div>
+        ))}
+
+        {/* Upload placeholder */}
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:border-gray-400 transition-all disabled:opacity-50"
+        >
+          {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+          <span className="text-xs mt-1">{uploading ? 'Uploading' : 'Add'}</span>
+        </button>
+      </div>
+
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+      >
+        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        {uploading ? 'Uploading...' : 'Upload Images'}
+      </button>
+      <p className="text-xs text-gray-400 mt-1">You can select multiple images at once.</p>
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => e.target.files?.length && handleFiles(e.target.files)}
+      />
+    </div>
+  );
+}
+
+// ─── Section Card wrapper ─────────────────────────────────────────────────────
+function SectionCard({ title, badge, children }: { title: string; badge?: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        {badge && <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">{badge}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ─── Toggle ───────────────────────────────────────────────────────────────────
+function Toggle({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer select-none">
+      <div
+        className={`relative w-10 h-5 rounded-full transition-colors ${checked ? 'bg-black' : 'bg-gray-300'}`}
+        onClick={() => onChange(!checked)}
+      >
+        <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+      </div>
+      <span className="text-sm font-medium text-gray-700">{label}</span>
+    </label>
+  );
+}
+
+// ─── Input ────────────────────────────────────────────────────────────────────
+function Field({ label, value, onChange, textarea, rows, placeholder }: any) {
+  const cls = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all";
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      {textarea
+        ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows || 3} placeholder={placeholder} className={cls} />
+        : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
+      }
+    </div>
+  );
+}
+
+// ─── Main Settings Page ───────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { data, fetchData, setData } = useAppStore();
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<any>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { if (data) setFormData(data); }, [data]);
 
-  useEffect(() => {
-    if (data) {
-      setFormData(data);
-    }
-  }, [data]);
+  if (!formData) {
+    return (
+      <div className="p-8 flex items-center gap-3 text-gray-400">
+        <Loader2 className="w-5 h-5 animate-spin" /> Loading settings...
+      </div>
+    );
+  }
 
-  if (!formData) return <div className="p-8">Loading...</div>;
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  const sec = (field: string, val: any) =>
+    setFormData((prev: any) => ({ ...prev, sections: { ...prev.sections, [field]: val } }));
 
   const handleSave = async () => {
     setSaving(true);
@@ -31,532 +251,210 @@ export default function SettingsPage() {
       });
       if (res.ok) {
         setData(formData);
-        alert('Settings saved successfully!');
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert('Failed to save settings');
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       alert('Failed to save settings');
     }
     setSaving(false);
   };
 
-  const handleChange = (section: string, field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
-  };
-
-  const handleReviewChange = (index: number, field: string, value: any) => {
-    const newReviews = [...formData.reviews];
-    newReviews[index] = { ...newReviews[index], [field]: value };
-    setFormData((prev: any) => ({ ...prev, reviews: newReviews }));
-  };
-
-  const addReview = () => {
-    setFormData((prev: any) => ({
-      ...prev,
-      reviews: [
-        ...prev.reviews,
-        { id: Date.now().toString(), name: '', rating: 5, review: '', image: '' }
-      ]
-    }));
-  };
-
-  const removeReview = (index: number) => {
-    const newReviews = [...formData.reviews];
-    newReviews.splice(index, 1);
-    setFormData((prev: any) => ({ ...prev, reviews: newReviews }));
-  };
-
-  const handleInstagramImageChange = (index: number, value: string) => {
-    const newImages = [...(formData.sections.instagram?.images || [])];
-    newImages[index] = value;
-    handleChange('sections', 'instagram', { ...formData.sections.instagram, images: newImages });
-  };
-
-  const addInstagramImage = () => {
-    const newImages = [...(formData.sections.instagram?.images || []), ''];
-    handleChange('sections', 'instagram', { ...formData.sections.instagram, images: newImages });
-  };
-
-  const removeInstagramImage = (index: number) => {
-    const newImages = [...(formData.sections.instagram?.images || [])];
-    newImages.splice(index, 1);
-    handleChange('sections', 'instagram', { ...formData.sections.instagram, images: newImages });
-  };
-
-  const handleCollectionChange = (index: number, field: string, value: any) => {
-    const newCollections = [...(formData.collections || [])];
-    newCollections[index] = { ...newCollections[index], [field]: value };
-    setFormData((prev: any) => ({ ...prev, collections: newCollections }));
-  };
-
-  const addCollection = () => {
-    setFormData((prev: any) => ({
-      ...prev,
-      collections: [
-        ...(prev.collections || []),
-        { id: Date.now().toString(), title: '', description: '', image: '' }
-      ]
-    }));
-  };
-
-  const removeCollection = (index: number) => {
-    const newCollections = [...(formData.collections || [])];
-    newCollections.splice(index, 1);
-    setFormData((prev: any) => ({ ...prev, collections: newCollections }));
-  };
+  const hero = formData.sections?.hero || {};
+  const brandStory = formData.sections?.brandStory || {};
+  const instagram = formData.sections?.instagram || {};
 
   return (
-    <div className="space-y-8 max-w-4xl pb-20">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Site Settings</h2>
-        <button 
+    <div className="space-y-6 max-w-4xl pb-20">
+
+      {/* Header */}
+      <div className="flex items-center justify-between sticky top-0 bg-gray-50 py-3 z-10 border-b border-gray-200 -mx-6 px-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Site Settings</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Manage your homepage sections and content</p>
+        </div>
+        <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 font-medium text-sm"
         >
-          <Save className="w-4 h-4" />
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+            : saved
+            ? <><CheckCircle className="w-4 h-4 text-green-400" /> Saved!</>
+            : <><Save className="w-4 h-4" /> Save Changes</>
+          }
         </button>
       </div>
 
-      {/* Colors */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Colors</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Object.entries(formData.theme).map(([key, value]) => (
-            <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-2 capitalize">
-                {key.replace(/([A-Z])/g, ' $1').trim()}
-              </label>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="color" 
-                  value={value as string}
-                  onChange={(e) => handleChange('theme', key, e.target.value)}
-                  className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                />
-                <input 
-                  type="text" 
-                  value={value as string}
-                  onChange={(e) => handleChange('theme', key, e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── 1. Hero Section ─────────────────────────────────────────────────── */}
+      <SectionCard title="Hero Section" badge="Live on Homepage">
+        <p className="text-xs text-gray-400 -mt-2">This fallback content shows when no products are pinned to the hero slider.</p>
+        <Toggle
+          id="heroEnabled"
+          label="Enable Hero Section"
+          checked={hero.enabled ?? true}
+          onChange={(v) => sec('hero', { ...hero, enabled: v })}
+        />
+        <Field label="Title" value={hero.title || ''} onChange={(v: string) => sec('hero', { ...hero, title: v })} placeholder="e.g. Walk with Confidence" />
+        <Field label="Subtitle" value={hero.subtitle || ''} onChange={(v: string) => sec('hero', { ...hero, subtitle: v })} placeholder="A short tagline..." />
+        <ImageUpload
+          label="Background Image"
+          currentUrl={hero.image || ''}
+          onUploaded={(url) => sec('hero', { ...hero, image: url })}
+          hint="Recommended: 1920×1080px. Shown behind the hero text."
+        />
+      </SectionCard>
 
-      {/* Hero Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Hero Section (Fallback)</h3>
-        <p className="text-sm text-gray-500">This content is shown if no products are selected for the Hero Slider.</p>
+      {/* ── 2. Brand Story Section ───────────────────────────────────────────── */}
+      <SectionCard title="Brand Story Section" badge="Live on Homepage">
+        <Toggle
+          id="brandStoryEnabled"
+          label="Enable Brand Story Section"
+          checked={brandStory.enabled ?? true}
+          onChange={(v) => sec('brandStory', { ...brandStory, enabled: v })}
+        />
+        <Field
+          label="Title"
+          value={brandStory.title || ''}
+          onChange={(v: string) => sec('brandStory', { ...brandStory, title: v })}
+          placeholder="e.g. Crafted for Comfort"
+        />
+        <Field
+          label="Description"
+          value={brandStory.description || ''}
+          onChange={(v: string) => sec('brandStory', { ...brandStory, description: v })}
+          textarea
+          rows={4}
+          placeholder="Tell your brand's story..."
+        />
+        <ImageUpload
+          label="Story Image"
+          currentUrl={brandStory.image || ''}
+          onUploaded={(url) => sec('brandStory', { ...brandStory, image: url })}
+          hint="Recommended: 800×1000px portrait. Displayed next to the story text."
+        />
+      </SectionCard>
+
+      {/* ── 3. Instagram / Photo Gallery Section ─────────────────────────────── */}
+      <SectionCard title="Instagram Gallery Section" badge="Live on Homepage">
+        <Toggle
+          id="instagramEnabled"
+          label="Enable Gallery Section"
+          checked={instagram.enabled ?? true}
+          onChange={(v) => sec('instagram', { ...instagram, enabled: v })}
+        />
+        <Field
+          label="Section Title"
+          value={instagram.title || ''}
+          onChange={(v: string) => sec('instagram', { ...instagram, title: v })}
+          placeholder="e.g. Follow Us @MantraShoes"
+        />
+        <Field
+          label="Instagram Profile URL"
+          value={instagram.profileLink || ''}
+          onChange={(v: string) => sec('instagram', { ...instagram, profileLink: v })}
+          placeholder="https://instagram.com/youraccount"
+        />
+
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-1.5">Gallery Images</p>
+          <p className="text-xs text-gray-400 mb-3">Upload square images (1:1). Shown as a photo grid on the homepage. Hover over a photo to delete it.</p>
+          <GalleryUpload
+            images={instagram.images || []}
+            onChange={(imgs) => sec('instagram', { ...instagram, images: imgs })}
+          />
+        </div>
+      </SectionCard>
+
+      {/* ── 4. Customer Reviews ───────────────────────────────────────────────── */}
+      <SectionCard title="Customer Reviews">
+        <Toggle
+          id="reviewsEnabled"
+          label="Enable Reviews Section"
+          checked={formData.sections?.reviews?.enabled ?? true}
+          onChange={(v) => sec('reviews', { ...formData.sections?.reviews, enabled: v })}
+        />
+        <Field
+          label="Section Title"
+          value={formData.sections?.reviews?.title || ''}
+          onChange={(v: string) => sec('reviews', { ...formData.sections?.reviews, title: v })}
+          placeholder="e.g. What Our Customers Say"
+        />
+
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              id="heroEnabled"
-              checked={formData.sections.hero.enabled}
-              onChange={(e) => handleChange('sections', 'hero', { ...formData.sections.hero, enabled: e.target.checked })}
-              className="rounded border-gray-300 text-black focus:ring-black"
-            />
-            <label htmlFor="heroEnabled" className="text-sm font-medium text-gray-700">Enable Hero Section</label>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input 
-              type="text" 
-              value={formData.sections.hero.title}
-              onChange={(e) => handleChange('sections', 'hero', { ...formData.sections.hero, title: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-            <input 
-              type="text" 
-              value={formData.sections.hero.subtitle}
-              onChange={(e) => handleChange('sections', 'hero', { ...formData.sections.hero, subtitle: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Background Image URL</label>
-            <input 
-              type="text" 
-              value={formData.sections.hero.image}
-              onChange={(e) => handleChange('sections', 'hero', { ...formData.sections.hero, image: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Page Headers */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Page Headers</h3>
-        
-        <div className="space-y-6">
-          {/* Shop Header */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Shop Page</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.shopHeader?.title || ''}
-                  onChange={(e) => handleChange('sections', 'shopHeader', { ...formData.sections.shopHeader, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Subtitle</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.shopHeader?.subtitle || ''}
-                  onChange={(e) => handleChange('sections', 'shopHeader', { ...formData.sections.shopHeader, subtitle: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Collections Header */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h4 className="font-medium text-gray-900">Collections Page</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.collectionsHeader?.title || ''}
-                  onChange={(e) => handleChange('sections', 'collectionsHeader', { ...formData.sections.collectionsHeader, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Subtitle</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.collectionsHeader?.subtitle || ''}
-                  onChange={(e) => handleChange('sections', 'collectionsHeader', { ...formData.sections.collectionsHeader, subtitle: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* About Header */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h4 className="font-medium text-gray-900">About Page</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.aboutHeader?.title || ''}
-                  onChange={(e) => handleChange('sections', 'aboutHeader', { ...formData.sections.aboutHeader, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Subtitle</label>
-                <input 
-                  type="text" 
-                  value={formData.sections.aboutHeader?.subtitle || ''}
-                  onChange={(e) => handleChange('sections', 'aboutHeader', { ...formData.sections.aboutHeader, subtitle: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Brand Story */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Brand Story Section</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              id="brandStoryEnabled"
-              checked={formData.sections.brandStory?.enabled ?? true}
-              onChange={(e) => handleChange('sections', 'brandStory', { ...formData.sections.brandStory, enabled: e.target.checked })}
-              className="rounded border-gray-300 text-black focus:ring-black"
-            />
-            <label htmlFor="brandStoryEnabled" className="text-sm font-medium text-gray-700">Enable Brand Story Section</label>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input 
-              type="text" 
-              value={formData.sections.brandStory?.title || ''}
-              onChange={(e) => handleChange('sections', 'brandStory', { ...formData.sections.brandStory, title: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea 
-              value={formData.sections.brandStory?.description || ''}
-              onChange={(e) => handleChange('sections', 'brandStory', { ...formData.sections.brandStory, description: e.target.value })}
-              rows={4}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-            <input 
-              type="text" 
-              value={formData.sections.brandStory?.image || ''}
-              onChange={(e) => handleChange('sections', 'brandStory', { ...formData.sections.brandStory, image: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Instagram Gallery */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Instagram Gallery Section</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              id="instagramEnabled"
-              checked={formData.sections.instagram?.enabled ?? true}
-              onChange={(e) => handleChange('sections', 'instagram', { ...formData.sections.instagram, enabled: e.target.checked })}
-              className="rounded border-gray-300 text-black focus:ring-black"
-            />
-            <label htmlFor="instagramEnabled" className="text-sm font-medium text-gray-700">Enable Instagram Section</label>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input 
-              type="text" 
-              value={formData.sections.instagram?.title || ''}
-              onChange={(e) => handleChange('sections', 'instagram', { ...formData.sections.instagram, title: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Profile URL</label>
-            <input 
-              type="text" 
-              value={formData.sections.instagram?.profileLink || ''}
-              onChange={(e) => handleChange('sections', 'instagram', { ...formData.sections.instagram, profileLink: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Images (URLs)</label>
-            <div className="space-y-2">
-              {(formData.sections.instagram?.images || []).map((img: string, idx: number) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input 
-                    type="text" 
-                    value={img}
-                    onChange={(e) => handleInstagramImageChange(idx, e.target.value)}
-                    placeholder="Image URL"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
-                  <button 
-                    onClick={() => removeInstagramImage(idx)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <button 
-                onClick={addInstagramImage}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                <Plus className="w-4 h-4" /> Add Image
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Collections */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Collections Page</h3>
-        <div className="space-y-6">
-          {(formData.collections || []).map((collection: any, idx: number) => (
-            <div key={collection.id || idx} className="p-4 border border-gray-200 rounded-lg relative">
-              <button 
-                onClick={() => removeCollection(idx)}
-                className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-10">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Collection Title</label>
-                  <input 
-                    type="text" 
-                    value={collection.title}
-                    onChange={(e) => handleCollectionChange(idx, 'title', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
-                  <textarea 
-                    value={collection.description}
-                    onChange={(e) => handleCollectionChange(idx, 'description', e.target.value)}
-                    rows={2}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Background Image URL</label>
-                  <input 
-                    type="text" 
-                    value={collection.image}
-                    onChange={(e) => handleCollectionChange(idx, 'image', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-          <button 
-            onClick={addCollection}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" /> Add Collection
-          </button>
-        </div>
-      </div>
-
-      {/* Reviews */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Customer Reviews</h3>
-        <div className="space-y-6">
           {(formData.reviews || []).map((review: any, idx: number) => (
-            <div key={review.id} className="p-4 border border-gray-200 rounded-lg relative">
-              <button 
-                onClick={() => removeReview(idx)}
-                className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            <div key={review.id} className="p-4 border border-gray-200 rounded-lg space-y-3 relative">
+              <button
+                onClick={() => {
+                  const r = [...formData.reviews];
+                  r.splice(idx, 1);
+                  setFormData((p: any) => ({ ...p, reviews: r }));
+                }}
+                className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
+                <Field label="Customer Name" value={review.name} onChange={(v: string) => {
+                  const r = [...formData.reviews]; r[idx] = { ...r[idx], name: v };
+                  setFormData((p: any) => ({ ...p, reviews: r }));
+                }} />
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Customer Name</label>
-                  <input 
-                    type="text" 
-                    value={review.name}
-                    onChange={(e) => handleReviewChange(idx, 'name', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Rating (1–5)</label>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map(star => (
+                      <button key={star} onClick={() => {
+                        const r = [...formData.reviews]; r[idx] = { ...r[idx], rating: star };
+                        setFormData((p: any) => ({ ...p, reviews: r }));
+                      }} className={`text-xl transition-colors ${star <= review.rating ? 'text-black' : 'text-gray-300'}`}>★</button>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Rating (1-5)</label>
-                  <input 
-                    type="number" 
-                    min="1" max="5"
-                    value={review.rating}
-                    onChange={(e) => handleReviewChange(idx, 'rating', parseInt(e.target.value))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
+                <div className="sm:col-span-2">
+                  <Field label="Review Text" value={review.review} textarea rows={2} onChange={(v: string) => {
+                    const r = [...formData.reviews]; r[idx] = { ...r[idx], review: v };
+                    setFormData((p: any) => ({ ...p, reviews: r }));
+                  }} />
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Avatar Image URL</label>
-                  <input 
-                    type="text" 
-                    value={review.image}
-                    onChange={(e) => handleReviewChange(idx, 'image', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Review Text</label>
-                  <textarea 
-                    value={review.review}
-                    onChange={(e) => handleReviewChange(idx, 'review', e.target.value)}
-                    rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
+                <div className="sm:col-span-2">
+                  <ImageUpload
+                    label="Customer Avatar"
+                    currentUrl={review.image || ''}
+                    onUploaded={(url) => {
+                      const r = [...formData.reviews]; r[idx] = { ...r[idx], image: url };
+                      setFormData((p: any) => ({ ...p, reviews: r }));
+                    }}
+                    hint="Small square photo of the customer."
                   />
                 </div>
               </div>
             </div>
           ))}
-          <button 
-            onClick={addReview}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+          <button
+            onClick={() => setFormData((p: any) => ({
+              ...p,
+              reviews: [...(p.reviews || []), { id: Date.now().toString(), name: '', rating: 5, review: '', image: '' }]
+            }))}
+            className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 text-gray-500 rounded-lg hover:border-gray-400 hover:text-gray-700 transition-colors text-sm font-medium w-full justify-center"
           >
             <Plus className="w-4 h-4" /> Add Review
           </button>
         </div>
-      </div>
+      </SectionCard>
 
-      {/* Footer */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold border-b pb-4">Footer Section</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Brand Description</label>
-            <textarea 
-              value={formData.sections.footer?.brandDescription || ''}
-              onChange={(e) => handleChange('sections', 'footer', { ...formData.sections.footer, brandDescription: e.target.value })}
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="color" 
-                  value={formData.sections.footer?.backgroundColor || '#000000'}
-                  onChange={(e) => handleChange('sections', 'footer', { ...formData.sections.footer, backgroundColor: e.target.value })}
-                  className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                />
-                <input 
-                  type="text" 
-                  value={formData.sections.footer?.backgroundColor || '#000000'}
-                  onChange={(e) => handleChange('sections', 'footer', { ...formData.sections.footer, backgroundColor: e.target.value })}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="color" 
-                  value={formData.sections.footer?.textColor || '#ffffff'}
-                  onChange={(e) => handleChange('sections', 'footer', { ...formData.sections.footer, textColor: e.target.value })}
-                  className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                />
-                <input 
-                  type="text" 
-                  value={formData.sections.footer?.textColor || '#ffffff'}
-                  onChange={(e) => handleChange('sections', 'footer', { ...formData.sections.footer, textColor: e.target.value })}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Save at bottom too */}
+      <div className="flex justify-end pt-2">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 font-medium"
+        >
+          {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save All Changes</>}
+        </button>
       </div>
-
     </div>
   );
 }

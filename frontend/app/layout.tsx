@@ -1,33 +1,39 @@
 import type { Metadata } from 'next';
-import { Cinzel, Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { Playfair_Display, Lora, Nunito_Sans } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 
-const cinzel = Cinzel({
-  weight: ['400', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-cinzel',
-});
-const cormorant = Cormorant_Garamond({
-  weight: ['300', '400', '500'],
+// Headings — warm, established, heritage
+const playfair = Playfair_Display({
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
   subsets: ['latin'],
-  variable: '--font-cormorant',
+  variable: '--font-playfair',
 });
-const dmSans = DM_Sans({
-  weight: ['300', '400', '500'],
+
+// Sub-headings / editorial — warm serif
+const lora = Lora({
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
   subsets: ['latin'],
-  variable: '--font-dm-sans',
+  variable: '--font-lora',
+});
+
+// Body / UI — clean, friendly, readable
+const nunitoSans = Nunito_Sans({
+  weight: ['300', '400', '500', '600'],
+  subsets: ['latin'],
+  variable: '--font-nunito',
 });
 
 export const metadata: Metadata = {
-  title: 'Mantra Shoes | Premium Footwear',
-  description: 'Premium shoes engineered for performance and style.',
+  title: 'Mantra Shoes | Trusted Footwear — Surat',
+  description: 'Mantra Shoes — a trusted, authentic local shoe brand in Surat. Comfort, quality and heritage since day one.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${cormorant.variable} ${dmSans.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${lora.variable} ${nunitoSans.variable}`}>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>

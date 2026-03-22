@@ -13,87 +13,87 @@ export const useAppStore = create<AppState>((set, get) => ({
   fetchData: async (force = false) => {
     if (get().data && !force) return;
     try {
-      const prodRes = await fetch(`${API_URL}/products/get-products`);
-      if (!prodRes.ok) {
-        throw new Error(`Failed to fetch products: ${prodRes.status} ${prodRes.statusText}`);
-      }
-      
-      const contentType = prodRes.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await prodRes.text();
-        console.error('Expected JSON but received:', text.substring(0, 100));
-        throw new Error(`Failed to fetch products: Expected JSON but received ${contentType || 'unknown content'}`);
-      }
-      
+      // Fetch all three sources in parallel
+      const [prodRes, catRes, settingsRes] = await Promise.all([
+        fetch(`${API_URL}/products/get-products`),
+        fetch(`${API_URL}/categories/get-categories`),
+        fetch('/api/data'),           // ← settings: hero, brandStory, instagram, reviews etc.
+      ]);
+
+      // Products
+      if (!prodRes.ok) throw new Error(`Products: ${prodRes.status}`);
       const prodData = await prodRes.json();
       const products = prodData.products || prodData || [];
 
-      const catRes = await fetch(`${API_URL}/categories/get-categories`);
-      if (!catRes.ok) {
-        throw new Error(`Failed to fetch categories: ${catRes.status} ${catRes.statusText}`);
+      // Categories
+      if (!catRes.ok) throw new Error(`Categories: ${catRes.status}`);
+      const catData = await catRes.json();
+      const categories = catData.categories || [];
+
+      // Settings (sections, reviews, theme) — gracefully fallback if unavailable
+      let settingsData: any = {};
+      if (settingsRes.ok) {
+        try { settingsData = await settingsRes.json(); } catch (_) {}
       }
 
-      const catContentType = catRes.headers.get("content-type");
-      if (!catContentType || !catContentType.includes("application/json")) {
-        throw new Error(`Failed to fetch categories: Expected JSON but received ${catContentType || 'unknown content'}`);
-      }
-
-      const categoriesData = await catRes.json();
-      
-      // Keep existing structure for sections/theme but update products/categories
-      const currentData = get().data || {
-        theme: { 
-          accent: '#000000', 
-          secondary: '#ffffff',
-          softBackground: '#f9fafb'
+      // Merge: settings sections override defaults, but products/categories always come from backend
+      const defaultSections = {
+        hero: {
+          enabled: true,
+          title: 'MANTRA',
+          subtitle: 'Authentic footwear, trusted by Surat since years.',
+          image: '',
         },
-        sections: {
-          hero: { 
-            enabled: true, 
-            title: 'MANTRA', 
-            subtitle: 'Step into the future of luxury footwear.', 
-            image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80' 
-          },
-          featuredProducts: { 
-            enabled: true, 
-            title: 'Featured Selection' 
-          },
-          brandStory: { 
-            enabled: true, 
-            title: 'A Legacy of Excellence',
-            description: 'Founded on the principles of quality and craftsmanship, Mantra represents the pinnacle of luxury footwear. Each pair is handcrafted using the finest materials sourced globally.',
-            image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80'
-          },
-          reviews: { 
-            enabled: true, 
-            title: 'Customer Stories' 
-          },
-          instagram: { 
-            enabled: true, 
-            title: 'Mantra on Instagram' 
-          },
-          footer: { 
-            enabled: true, 
-            description: 'Premium luxury footwear for the modern individual.',
-            email: 'hello@mantrashoes.com',
-            phone: '+91 74050 40700',
-            address: 'Shop No B-3, Varachha Main Rd, nr. Rise On Plaza, Sarthana Jakat Naka, Nana Varachha, Surat, Gujarat 395013'
-          }
+        brandStory: {
+          enabled: true,
+          title: 'A Legacy of Comfort',
+          description: 'Founded on quality and trust, Mantra Shoes has been the go-to footwear destination in Surat for decades.',
+          image: '',
         },
-        reviews: [
-          { id: 1, name: 'John Doe', review: 'Best shoes I have ever owned. The quality is unmatched.', rating: 5, image: 'https://picsum.photos/100/100?random=1' },
-          { id: 2, name: 'Jane Smith', review: 'Exceptional service and beautiful designs.', rating: 5, image: 'https://picsum.photos/100/100?random=2' },
-          { id: 3, name: 'Robert Brown', review: 'A true luxury experience from start to finish.', rating: 5, image: 'https://picsum.photos/100/100?random=3' }
-        ]
+        reviews: { enabled: true, title: 'What Our Customers Say' },
+        instagram: { enabled: true, title: 'Follow Us @MantraShoes', profileLink: '', images: [] },
+        footer: {
+          enabled: true,
+          description: 'Authentic, comfortable footwear for the whole family.',
+          email: 'hello@mantrashoes.com',
+          phone: '+91 74050 40700',
+          address: 'Shop No B-3, Varachha Main Rd, nr. Rise On Plaza, Sarthana Jakat Naka, Nana Varachha, Surat, Gujarat 395013',
+        },
       };
 
-      set({ 
-        data: { 
-          ...currentData,
-          products: products, 
-          categories: categoriesData.categories || [] 
-        } 
+      const sections = {
+        ...defaultSections,
+        ...(settingsData.sections || {}),
+        // Deep merge each section so partial settings don't wipe out defaults
+        hero:        { ...defaultSections.hero,        ...(settingsData.sections?.hero        || {}) },
+        brandStory:  { ...defaultSections.brandStory,  ...(settingsData.sections?.brandStory  || {}) },
+        reviews:     { ...defaultSections.reviews,     ...(settingsData.sections?.reviews     || {}) },
+        instagram:   { ...defaultSections.instagram,   ...(settingsData.sections?.instagram   || {}) },
+        // Footer: always keep phone/address/email from defaults if not present in saved data
+        footer: {
+          ...defaultSections.footer,
+          ...(settingsData.sections?.footer || {}),
+        },
+      };
+
+      const reviews = settingsData.reviews && settingsData.reviews.length > 0
+        ? settingsData.reviews
+        : [
+            { id: '1', name: 'Rahul Patel', review: 'Best shoe store in Surat! Quality is unmatched and very comfortable.', rating: 5, image: '' },
+            { id: '2', name: 'Priya Shah', review: 'Amazing collection and helpful staff. Highly recommended!', rating: 5, image: '' },
+            { id: '3', name: 'Amit Desai', review: 'Trustworthy brand with great prices. My whole family shops here.', rating: 5, image: '' },
+          ];
+
+      set({
+        data: {
+          ...(settingsData || {}),
+          sections,
+          reviews,
+          products,
+          categories,
+        },
       });
+
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }

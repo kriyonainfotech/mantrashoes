@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Instagram } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const AUTO_MS = 5000;
@@ -107,9 +107,9 @@ function ReelCard({ reel, onPlayStateChange }: {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <span style={{  fontSize: 11, fontFamily: 'var(--font-cinzel)', fontWeight: 700 }}>M</span>
+            <span style={{ fontSize: 11, fontFamily: 'var(--font-cinzel)', fontWeight: 700 }}>M</span>
           </div>
-          <span style={{  fontFamily: 'var(--font-dm-sans)', fontSize: 13, fontWeight: 600 }}>
+          <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, fontWeight: 600 }}>
             mantra_shoes_store
           </span>
         </div>
@@ -179,7 +179,7 @@ export default function InstagramReels() {
     fetch(`${API_URL}/reels`)
       .then(r => r.json())
       .then(d => { if (d.reels?.length) setReels(d.reels); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const total = reels.length;
@@ -213,27 +213,6 @@ export default function InstagramReels() {
   return (
     <section style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }} className="py-20">
       <div className="max-w-7xl mx-auto px-6">
-
-        {/* Header */}
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '10px', letterSpacing: '0.38em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
-              FOLLOW ALONG
-            </p>
-            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', fontWeight: 300, fontStyle: 'italic',  lineHeight: 1.1 }}>
-              @mantra_shoes_store
-            </h2>
-          </div>
-          <a
-            href="https://www.instagram.com/mantra_shoes_store"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2"
-            style={{ fontFamily: 'var(--font-cinzel)', fontSize: '14px', letterSpacing: '0.1em', textDecoration: 'none' }}
-          >
-            VIEW PROFILE →
-          </a>
-        </div>
 
         {/* Slider */}
         <div className="flex items-center justify-center gap-4">
