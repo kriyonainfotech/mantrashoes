@@ -137,6 +137,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             lg:translate-x-0
           `}
+
         >
           <NavLinks onNavigate={() => setSidebarOpen(false)} />
           <div className="mt-auto p-8 opacity-10 hidden lg:block">

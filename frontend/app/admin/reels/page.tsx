@@ -81,7 +81,7 @@ export default function AdminReelsPage() {
       setOrder('');
       if (fileRef.current) fileRef.current.value = '';
       fetchReels();
-    } catch (_) {}
+    } catch (_) { }
     setUploading(false);
     setProgress(0);
   };

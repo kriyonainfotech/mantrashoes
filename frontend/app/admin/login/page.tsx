@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
         <h1 className="text-[30vw] font-bebas">MANTRA</h1>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -63,7 +63,7 @@ export default function LoginPage() {
         <div className="bg-white p-10 border-thin shadow-xl relative overflow-hidden">
           {/* Top Line accent */}
           <div className="absolute top-0 left-0 w-full h-1 bg-ink"></div>
-          
+
           <div className="mb-10 text-center">
             <h2 className="eyebrow text-[9px] uppercase tracking-[0.4em] mb-4 font-bold text-ink/40">Mantra Shoes</h2>
             <h1 className="text-4xl font-bebas tracking-tight text-ink mb-2">Admin <span className="italic-serif text-3xl lowercase">Console</span></h1>
@@ -75,7 +75,7 @@ export default function LoginPage() {
               <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-ink/40 mb-1.5 block group-focus-within:text-ink transition-colors">
                 Email Address
               </label>
-              <input 
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -89,7 +89,7 @@ export default function LoginPage() {
               <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-ink/40 mb-1.5 block group-focus-within:text-ink transition-colors">
                 Security Key
               </label>
-              <input 
+              <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -105,7 +105,7 @@ export default function LoginPage() {
               </p>
             )}
 
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
               className="w-full relative group bg-ink text-cream py-4 overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50"

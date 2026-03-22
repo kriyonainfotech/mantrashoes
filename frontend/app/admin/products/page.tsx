@@ -247,8 +247,8 @@ export default function ProductsPage() {
             header: 'Prices',
             accessor: (product: any) => (
               <div className="flex flex-col">
-                <span className="text-gray-900 font-bold">${product.price}</span>
-                <span className="text-gray-400 line-through text-xs">${product.mrp}</span>
+                <span className="text-gray-900 font-bold">₹{product.price}</span>
+                <span className="text-gray-400 line-through text-xs">₹{product.mrp}</span>
               </div>
             ),
           },
@@ -358,7 +358,7 @@ export default function ProductsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Selling Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Selling Price (₹)</label>
                   <input
                     type="number"
                     value={editingProduct.price}
@@ -368,7 +368,7 @@ export default function ProductsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">MRP ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">MRP (₹)</label>
                   <input
                     type="number"
                     value={editingProduct.mrp}
