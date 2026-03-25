@@ -108,7 +108,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full relative group bg-ink text-cream py-4 overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50"
+              className="w-full relative group bg-ink text-white py-4 overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50"
             >
               <span className="z-10 relative font-bebas text-xl tracking-[0.2em] uppercase">
                 {isLoading ? 'Verifying...' : 'Authenticate'}

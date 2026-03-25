@@ -45,6 +45,7 @@ export interface Category {
   parent?: Category | string | null;
   isActive: boolean;
   showInNavbar: boolean;
+  showOnHome: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

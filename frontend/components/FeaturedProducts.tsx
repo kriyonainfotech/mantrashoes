@@ -6,64 +6,129 @@ import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { WHATSAPP_URL } from '@/lib/config';
 
+function getImg(img: any) {
+  return typeof img === 'string' ? img : img?.url || '';
+}
 
 export default function FeaturedProducts({ data, products, theme }: { data: any, products: any[], theme: any }) {
-  if (!data?.enabled) return null;
+  if (data?.enabled === false) return null;
 
-  const featured = products.filter(p => p.showInTopProducts).slice(0, 4);
+  // Use isFeatured from the database
+  const featured = products.filter(p => p.isFeatured && p.isActive !== false).slice(0, 8);
 
   if (featured.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-end mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-montserrat)' }}>
-            {data.title}
-          </h2>
-          <Link href="/shop">
-            <span className="text-sm font-semibold uppercase tracking-widest hover:underline cursor-pointer">
-              View All
-            </span>
+    <section 
+      className="py-16" 
+      style={{ backgroundColor: '#F8F5EF', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#999', marginBottom: '4px' }}>
+              Handpicked
+            </p>
+            <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.1 }}>
+              {data?.title || 'Featured Collection'}
+            </h2>
+          </div>
+          <Link 
+            href="/shop" 
+            className="hidden sm:inline-flex items-center gap-1"
+            style={{ fontFamily: 'var(--font-nunito)', fontSize: '13px', fontWeight: 600, color: '#1A1A1A' }}
+          >
+            Explore All →
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featured.map((product, index) => (
-            <Link key={product.id} href={`/product/${product.id}`}>
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group cursor-pointer"
-              >
-                <div className="relative aspect-square bg-gray-100 mb-4 overflow-hidden">
-                  <Image
-                    src={typeof product.images?.[0] === 'string' ? product.images[0] : product.images?.[0]?.url || ''}
-                    alt={product.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button 
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          {featured.map((product, i) => (
+            <motion.div
+              key={product._id || product.id}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35, delay: i * 0.05 }}
+              className="group"
+            >
+              <Link href={`/product/${product._id || product.id}`} className="block">
+                
+                {/* Image Container */}
+                <div 
+                  className="relative overflow-hidden flex items-center justify-center p-4"
+                  style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
+                >
+                  {getImg(product.images?.[0]) ? (
+                    <Image
+                      src={getImg(product.images[0])}
+                      alt={product.name}
+                      fill
+                      className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center font-nunito text-[11px] text-gray-400">
+                      No Image
+                    </div>
+                  )}
+
+                  {/* Badges */}
+                  <div className="absolute top-2 left-2 px-2 py-0.5" 
+                    style={{ backgroundColor: '#1A1A1A', fontFamily: 'var(--font-nunito)', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
+                    Featured
+                  </div>
+                  
+                  {product.mrp > product.price && (
+                    <div className="absolute top-2 right-2 px-2 py-0.5"
+                      style={{ backgroundColor: '#E63946', fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 700, color: '#fff' }}>
+                      {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                    </div>
+                  )}
+
+                  {/* WhatsApp overlay */}
+                  <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                    <button
                       onClick={(e) => {
                         e.preventDefault();
-                        window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=Hi, I'm interested in the ${product.name}`, '_blank');
-
+                        e.stopPropagation();
+                        const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
+                        window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${msg}`, '_blank');
                       }}
-                      className="bg-[#25D366] text-white px-6 py-3 font-semibold uppercase text-xs tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all flex items-center gap-2 hover:bg-[#1da851]"
+                      className="w-full flex items-center justify-center gap-2 py-3 text-white"
+                      style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}
                     >
-                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                      <MessageCircle className="w-4 h-4" />
+                      Order on WhatsApp
                     </button>
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-gray-500">{product.category?.name || product.category}</p>
-                <p className="text-lg font-medium mt-1">${product.price}</p>
-              </motion.div>
-            </Link>
+
+                {/* Info */}
+                <div className="pt-2.5 pb-1">
+                  {product.category?.name && (
+                    <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#999', marginBottom: '2px' }}>
+                      {product.category.name}
+                    </p>
+                  )}
+                  <h3 style={{ fontFamily: 'var(--font-nunito)', fontSize: '14px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, marginBottom: '5px' }} className="line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-baseline gap-2">
+                    <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 700, color: '#1A1A1A' }}>
+                      ₹{product.price.toLocaleString()}
+                    </span>
+                    {product.mrp > product.price && (
+                      <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 400, color: '#aaa', textDecoration: 'line-through' }}>
+                        ₹{product.mrp.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>

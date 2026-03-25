@@ -52,6 +52,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           image: '',
         },
         reviews: { enabled: true, title: 'What Our Customers Say' },
+        featured: { enabled: true, title: 'Featured Collection' },
         instagram: { enabled: true, title: 'Follow Us @MantraShoes', profileLink: '', images: [] },
         footer: {
           enabled: true,
@@ -69,6 +70,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         hero:        { ...defaultSections.hero,        ...(settingsData.sections?.hero        || {}) },
         brandStory:  { ...defaultSections.brandStory,  ...(settingsData.sections?.brandStory  || {}) },
         reviews:     { ...defaultSections.reviews,     ...(settingsData.sections?.reviews     || {}) },
+        featured:    { ...defaultSections.featured,    ...(settingsData.sections?.featured    || {}) },
         instagram:   { ...defaultSections.instagram,   ...(settingsData.sections?.instagram   || {}) },
         // Footer: always keep phone/address/email from defaults if not present in saved data
         footer: {

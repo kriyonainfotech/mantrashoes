@@ -2,7 +2,7 @@ const Category = require("../models/Category");
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name, slug, description, parent, isActive, showInNavbar, navbarIndex } = req.body;
+        const { name, slug, description, parent, isActive, showInNavbar, showOnHome, navbarIndex } = req.body;
 
         if (!name || !slug) {
             return res.status(400).json({ message: "Name and Slug are required" });
@@ -14,6 +14,7 @@ exports.createCategory = async (req, res) => {
             description,
             isActive: isActive !== undefined ? isActive : true,
             showInNavbar: showInNavbar !== undefined ? showInNavbar : false,
+            showOnHome: showOnHome !== undefined ? showOnHome : false,
             navbarIndex: navbarIndex !== undefined ? navbarIndex : 0
         };
         if (parent) categoryData.parent = parent;
@@ -81,7 +82,7 @@ exports.getCategoryBySlug = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
     try {
-        const { name, slug, description, parent, isActive, showInNavbar, navbarIndex } = req.body;
+        const { name, slug, description, parent, isActive, showInNavbar, showOnHome, navbarIndex } = req.body;
         const category = await Category.findById(req.params.id);
         if (!category) {
             return res.status(404).json({ message: "Category not found" });
@@ -93,6 +94,7 @@ exports.updateCategory = async (req, res) => {
         category.parent = parent !== undefined ? (parent || null) : category.parent;
         category.isActive = isActive !== undefined ? isActive : category.isActive;
         category.showInNavbar = showInNavbar !== undefined ? showInNavbar : category.showInNavbar;
+        category.showOnHome = showOnHome !== undefined ? showOnHome : category.showOnHome;
         category.navbarIndex = navbarIndex !== undefined ? navbarIndex : category.navbarIndex;
 
         await category.save();

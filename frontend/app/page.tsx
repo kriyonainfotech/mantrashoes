@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import MarqueeStrip from '@/components/MarqueeStrip';
 import CategorySection from '@/components/CategorySection';
+import FeaturedProducts from '@/components/FeaturedProducts';
 import BrandStory from '@/components/BrandStory';
 import Reviews from '@/components/Reviews';
 import Footer from '@/components/Footer';
@@ -34,9 +35,9 @@ export default function Home() {
     );
   }
 
-  // Only show top-level categories (no parent) that are active
+  // Show top-level categories OR categories marked to show on home
   const activeCategories = (data.categories || []).filter(
-    (c: any) => c.isActive && !c.parent
+    (c: any) => c.isActive && (c.showOnHome || !c.parent)
   );
 
   const hero = data.sections?.hero;
@@ -57,7 +58,10 @@ export default function Home() {
       {/* 3. Marquee Strip */}
       <MarqueeStrip />
 
-      {/* 4. Category Sections — one per top-level active category */}
+      {/* 4. Featured Products Collection */}
+      <FeaturedProducts data={data.sections?.featured} products={data.products} theme={data.theme} />
+
+      {/* 5. Category Sections — one per top-level active category */}
       {activeCategories.map((category: any) => {
         // Collect all sub-category IDs
         const subCategoryIds = (data.categories || [])

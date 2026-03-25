@@ -27,7 +27,8 @@ export default function CategoriesPage() {
     description: '',
     parent: '',
     isActive: true,
-    showInNavbar: false
+    showInNavbar: false,
+    showOnHome: false
   });
 
   useEffect(() => {
@@ -42,10 +43,11 @@ export default function CategoriesPage() {
         description: editingCategory.description || '',
         parent: typeof editingCategory.parent === 'object' ? editingCategory.parent?._id || '' : editingCategory.parent || '',
         isActive: editingCategory.isActive !== undefined ? editingCategory.isActive : true,
-        showInNavbar: editingCategory.showInNavbar !== undefined ? editingCategory.showInNavbar : false
+        showInNavbar: editingCategory.showInNavbar !== undefined ? editingCategory.showInNavbar : false,
+        showOnHome: editingCategory.showOnHome !== undefined ? editingCategory.showOnHome : false
       });
     } else {
-      setFormData({ name: '', slug: '', description: '', parent: '', isActive: true, showInNavbar: false });
+      setFormData({ name: '', slug: '', description: '', parent: '', isActive: true, showInNavbar: false, showOnHome: false });
     }
   }, [editingCategory]);
 
@@ -264,6 +266,15 @@ export default function CategoriesPage() {
                     className="w-4 h-4 accent-ink cursor-pointer"
                   />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-ink/60 group-hover:text-ink transition-colors">Show in Navbar</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.showOnHome}
+                    onChange={(e) => setFormData({ ...formData, showOnHome: e.target.checked })}
+                    className="w-4 h-4 accent-ink cursor-pointer"
+                  />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-ink/60 group-hover:text-ink transition-colors">Show on Homepage</span>
                 </label>
               </div>
 

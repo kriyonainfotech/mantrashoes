@@ -265,6 +265,7 @@ export default function SettingsPage() {
   const hero = formData.sections?.hero || {};
   const brandStory = formData.sections?.brandStory || {};
   const instagram = formData.sections?.instagram || {};
+  const featured = formData.sections?.featured || {};
 
   return (
     <div className="space-y-6 max-w-4xl pb-20">
@@ -334,6 +335,23 @@ export default function SettingsPage() {
           onUploaded={(url) => sec('brandStory', { ...brandStory, image: url })}
           hint="Recommended: 800×1000px portrait. Displayed next to the story text."
         />
+      </SectionCard>
+
+      {/* 2.5 Featured Products Section */}
+      <SectionCard title="Featured Collection Section" badge="Live on Homepage">
+        <Toggle
+          id="featuredEnabled"
+          label="Enable Featured Section"
+          checked={featured.enabled ?? true}
+          onChange={(v) => sec('featured', { ...featured, enabled: v })}
+        />
+        <Field 
+          label="Section Title" 
+          value={featured.title || ''} 
+          onChange={(v: string) => sec('featured', { ...featured, title: v })} 
+          placeholder="e.g. Featured Collection" 
+        />
+        <p className="text-xs text-gray-400">Products marked as "Feature on Homepage" in the product editor will show up here.</p>
       </SectionCard>
 
       {/* ── 3. Instagram / Photo Gallery Section ─────────────────────────────── */}
