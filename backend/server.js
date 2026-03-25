@@ -14,7 +14,7 @@ connectDB();
 const allowedOrigins = [
   "http://localhost:3000",   // local dev (Next.js)
   "https://mantrashoes.com",
-  "https://www.mantrashoes.com",
+  "https://mantrashoes.com",
   "https://mantra-shoes.vercel.app",
   "https://www.mantra-shoes.vercel.app"
 ];
