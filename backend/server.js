@@ -11,7 +11,30 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000",   // local dev (Next.js)
+  "https://mantrashoes.com",
+  "https://www.mantrashoes.com",
+  "https://mantra-shoes.vercel.app",
+  "https://www.mantra-shoes.vercel.app"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // if using cookies/auth
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
