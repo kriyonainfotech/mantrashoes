@@ -77,7 +77,7 @@ export default function CategorySection({ category, products }: { category: Cate
 
                 {/* Image container — taller ratio, bigger visual presence */}
                 <div
-                  className="relative overflow-hidden"
+                  className="relative overflow-hidden flex items-center justify-center p-4" // Added flex, centering, and padding
                   style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
                 >
                   {getImg(product.images?.[0]) ? (
@@ -85,7 +85,9 @@ export default function CategorySection({ category, products }: { category: Cate
                       src={getImg(product.images[0])}
                       alt={product.name}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      /* 2. Change object-cover to object-contain */
+                      /* 3. Add mix-blend-multiply to remove the "off-white" box around the shoe */
+                      className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center"
@@ -93,7 +95,6 @@ export default function CategorySection({ category, products }: { category: Cate
                       No Image
                     </div>
                   )}
-
                   {/* Featured badge */}
                   {product.isFeatured && (
                     <div className="absolute top-2 left-2 px-2 py-0.5"

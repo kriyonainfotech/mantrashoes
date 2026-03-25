@@ -1,0 +1,12 @@
+﻿--- Categories ---
+Name: Men's collection, Parent: null, isActive: true, isFeatured: undefined, showOnHome: undefined
+Name: Casual Footwear, Parent: 69bc0a01d573f02241ebc3d1, isActive: true, isFeatured: undefined, showOnHome: undefined
+Name: Party Footwear, Parent: 69bc0a01d573f02241ebc3d1, isActive: true, isFeatured: undefined, showOnHome: undefined
+Name: Women's Collection, Parent: null, isActive: true, isFeatured: undefined, showOnHome: undefined
+Name: Casual Footwear, Parent: 69bd689a0e845f2818053830, isActive: true, isFeatured: undefined, showOnHome: undefined
+
+--- Products ---
+Total Active Products: 2
+Featured Products: 2
+  - ES-25 (Category: 69bc0a1cd573f02241ebc3d3)
+  - EL-BRISHY CASUAL CHAPPAL  (Category: 69c36cdebb35ac2f1ec96638)

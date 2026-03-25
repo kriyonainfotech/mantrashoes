@@ -59,11 +59,20 @@ export default function Home() {
 
       {/* 4. Category Sections — one per top-level active category */}
       {activeCategories.map((category: any) => {
+        // Collect all sub-category IDs
+        const subCategoryIds = (data.categories || [])
+          .filter((c: any) => (typeof c.parent === 'string' ? c.parent : c.parent?._id) === category._id)
+          .map((c: any) => c._id);
+        
+        const categoryIds = [category._id, ...subCategoryIds];
+
         const categoryProducts = (data.products || []).filter(
-          (p: any) =>
-            p.isActive !== false &&
-            (p.category?._id === category._id || p.category === category._id)
+          (p: any) => {
+            const pCatId = typeof p.category === 'string' ? p.category : p.category?._id;
+            return p.isActive !== false && categoryIds.includes(pCatId);
+          }
         );
+
         return (
           <CategorySection key={category._id} category={category} products={categoryProducts} />
         );
