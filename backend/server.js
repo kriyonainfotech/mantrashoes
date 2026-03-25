@@ -15,8 +15,8 @@ const allowedOrigins = [
   "http://localhost:3000",   // local dev (Next.js)
   "https://mantrashoes.com",
   "https://www.mantrashoes.com",
-  "https://mantra-shoes.vercel.app",
-  "https://www.mantra-shoes.vercel.app"
+  "https://mantrashoes.vercel.app",
+  "https://www.mantrashoes.vercel.app"
 ];
 
 app.use(
