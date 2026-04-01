@@ -7,10 +7,8 @@ import DataTable from '@/components/admin/DataTable';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '@/lib/config';
 
-
-
-
 export default function ProductsPage() {
+
   const { data, setData } = useAppStore();
   const [saving, setSaving] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -18,6 +16,7 @@ export default function ProductsPage() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,7 +47,7 @@ export default function ProductsPage() {
       discount: 0,
       description: '',
       images: [],
-      category: '',
+      category: selectedCategory !== 'all' ? selectedCategory : '',
       brand: '',
       stock: 0,
       whatsapp: '',
@@ -211,18 +210,43 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Products</h2>
-        <button
-          onClick={handleAddProduct}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Product
-        </button>
+        <div>
+          <h2 className="text-3xl font-bebas tracking-tight uppercase">Products</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-ink/20 mt-1">Inventory Management</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1 flex-wrap max-w-xl">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-3 py-1.5 text-xs font-bold tracking-widest rounded-md transition-all ${selectedCategory === 'all' ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              ALL
+            </button>
+            {categories.map((cat: any) => (
+              <button
+                key={cat._id}
+                onClick={() => setSelectedCategory(cat._id)}
+                className={`px-3 py-1.5 text-xs font-bold tracking-widest rounded-md transition-all ${selectedCategory === cat._id ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                {cat.name.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleAddProduct}
+            className="flex items-center gap-2 px-6 py-3 bg-black text-white font-bebas text-lg tracking-widest hover:bg-gray-800 transition-all active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       <DataTable
-        data={data?.products || []}
+        data={(data?.products || []).filter((p: any) =>
+          selectedCategory === 'all' ||
+          (typeof p.category === 'object' ? p.category?._id : p.category) === selectedCategory
+        )}
         isLoading={loading}
         columns={[
           {
