@@ -44,6 +44,7 @@ app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/reels", require("./routes/reelRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
+app.get("/api/search", require("./controllers/searchController").globalSearch);
 
 // Test route (optional)
 app.get("/", (req, res) => {

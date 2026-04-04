@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Menu, X, MessageCircle, MapPin, Phone, ChevronRight } from 'lucide-react';
+import { Menu, X, MessageCircle, MapPin, Phone, ChevronRight, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
-import { WHATSAPP_URL } from '@/lib/config';
+import { WHATSAPP_URL, API_URL } from '@/lib/config';
 
 
 interface CategoryNode {
@@ -154,14 +155,68 @@ function MobileCategoryItem({ node, depth, onClose }: { node: CategoryNode; dept
 
 export default function Navbar({ theme }: { theme: any }) {
   const { data } = useAppStore();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ products: any[], categories: any[] }>({ products: [], categories: [] });
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+  const mobileSearchContainerRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+      if (mobileSearchContainerRef.current && !mobileSearchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearchQuery(params.get('search') || '');
+  }, []);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+       setSearchResults({ products: [], categories: [] });
+       setIsSearchOpen(false);
+       return;
+    }
+    const timeout = setTimeout(async () => {
+       try {
+          const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(searchQuery.trim())}`);
+          const data = await res.json();
+          setSearchResults(data);
+          setIsSearchOpen(true);
+       } catch (e) {
+          console.error("Search fetch error", e);
+       }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push('/shop');
+    }
+    setMobileOpen(false);
+  };
 
   const phone = data?.sections?.footer?.phone || '';
   const address = data?.sections?.footer?.address || '';
@@ -214,14 +269,79 @@ export default function Navbar({ theme }: { theme: any }) {
             </div>
           </Link>
 
-          {/* Address + Phone — desktop */}
+          {/* Search + Phone — desktop */}
           <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
-            {address && (
-              <span className="flex items-center gap-1.5" style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 400, color: '#777' }}>
-                <MapPin className="w-3 h-3 flex-shrink-0 opacity-60" />
-                {address}
-              </span>
-            )}
+            <form onSubmit={handleSearch} className="relative w-full max-w-sm" ref={searchContainerRef}>
+              <div className="flex items-center bg-black/5 rounded-full px-4 py-2 transition-colors focus-within:bg-black/10">
+                <Search className="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search products, tags..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => { if(searchQuery.trim()) setIsSearchOpen(true); }}
+                  className="bg-transparent border-none outline-none w-full text-sm font-medium placeholder-gray-500"
+                  style={{ fontFamily: 'var(--font-nunito)', color: '#1A1A1A' }}
+                />
+              </div>
+
+              {/* Desktop Search Dropdown */}
+              <AnimatePresence>
+                {isSearchOpen && (searchResults.products?.length > 0 || searchResults.categories?.length > 0) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-lg border border-black/5 overflow-hidden z-50 flex flex-col"
+                  >
+                    {searchResults.categories?.length > 0 && (
+                      <div className="p-3 border-b border-black/5">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 px-2">Categories</p>
+                        {searchResults.categories.map((c: any) => (
+                          <Link
+                            key={`cat-${c._id}`}
+                            href={`/category/${c.slug}`}
+                            onClick={() => setIsSearchOpen(false)}
+                            className="block px-2 py-1.5 text-sm font-medium hover:bg-black/5 rounded-md transition-colors"
+                          >
+                            {c.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.products?.length > 0 && (
+                       <div className="p-3">
+                         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 px-2">Products</p>
+                         {searchResults.products.map((p: any) => (
+                           <Link
+                             key={`prod-${p._id}`}
+                             href={`/product/${p.slug || p._id}`}
+                             onClick={() => setIsSearchOpen(false)}
+                             className="flex items-center gap-3 px-2 py-2 hover:bg-black/5 rounded-md transition-colors"
+                           >
+                             {p.images?.[0]?.url && (
+                               <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                                  <Image src={p.images[0].url} alt={p.name} fill className="object-cover" />
+                               </div>
+                             )}
+                             <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-semibold truncate">{p.name}</p>
+                                <p className="text-xs text-gray-500">₹{p.price}</p>
+                             </div>
+                           </Link>
+                         ))}
+                       </div>
+                    )}
+                    <button
+                      type="submit"
+                      className="w-full p-3 text-sm font-bold text-center border-t border-black/5 bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                      View All Results
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
             {phone && (
               <a href={`tel:${phone}`} className="flex items-center gap-1.5" style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 400, color: '#777' }}>
                 <Phone className="w-3 h-3 flex-shrink-0 opacity-60" />
@@ -289,12 +409,77 @@ export default function Navbar({ theme }: { theme: any }) {
               <MobileTree nodes={navRoots} onClose={() => setMobileOpen(false)} />
               <Link href="/about" onClick={() => setMobileOpen(false)} style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 600, color: '#1A1A1A' }}>About</Link>
               <Link href="/contact" onClick={() => setMobileOpen(false)} style={{ fontFamily: 'var(--font-nunito)', fontSize: '15px', fontWeight: 600, color: '#1A1A1A' }}>Contact Us</Link>
-              {address && (
-                <p className="flex items-center gap-2 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', fontFamily: 'var(--font-nunito)', fontSize: '12px', color: '#777' }}>
-                  <MapPin className="w-3 h-3 flex-shrink-0 opacity-60" />
-                  {address}
-                </p>
-              )}
+              <form onSubmit={handleSearch} className="relative w-full pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} ref={mobileSearchContainerRef}>
+                <div className="flex items-center bg-black/5 rounded-lg px-4 py-3 transition-colors focus-within:bg-black/10">
+                  <Search className="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search products, tags..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => { if(searchQuery.trim()) setIsSearchOpen(true); }}
+                    className="bg-transparent border-none outline-none w-full text-[15px] font-medium placeholder-gray-500"
+                    style={{ fontFamily: 'var(--font-nunito)', color: '#1A1A1A' }}
+                  />
+                </div>
+
+                {/* Mobile Search Dropdown */}
+                <AnimatePresence>
+                  {isSearchOpen && (searchResults.products?.length > 0 || searchResults.categories?.length > 0) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-xl shadow-lg border border-black/5 overflow-hidden z-50 flex flex-col"
+                    >
+                      {searchResults.categories?.length > 0 && (
+                        <div className="p-3 border-b border-black/5">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 px-2">Categories</p>
+                          {searchResults.categories.map((c: any) => (
+                            <Link
+                              key={`cat-${c._id}`}
+                              href={`/category/${c.slug}`}
+                              onClick={() => { setIsSearchOpen(false); setMobileOpen(false); }}
+                              className="block px-2 py-1.5 text-sm font-medium hover:bg-black/5 rounded-md transition-colors"
+                            >
+                              {c.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                      {searchResults.products?.length > 0 && (
+                         <div className="p-3 max-h-[40vh] overflow-y-auto">
+                           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 px-2">Products</p>
+                           {searchResults.products.map((p: any) => (
+                             <Link
+                               key={`prod-${p._id}`}
+                               href={`/product/${p.slug || p._id}`}
+                               onClick={() => { setIsSearchOpen(false); setMobileOpen(false); }}
+                               className="flex items-center gap-3 px-2 py-2 hover:bg-black/5 rounded-md transition-colors"
+                             >
+                               {p.images?.[0]?.url && (
+                                 <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                                    <Image src={p.images[0].url} alt={p.name} fill className="object-cover" />
+                                 </div>
+                               )}
+                               <div className="flex-1 overflow-hidden">
+                                  <p className="text-sm font-semibold truncate">{p.name}</p>
+                                  <p className="text-xs text-gray-500">₹{p.price}</p>
+                               </div>
+                             </Link>
+                           ))}
+                         </div>
+                      )}
+                      <button
+                        type="submit"
+                        className="w-full p-3 text-sm font-bold text-center border-t border-black/5 bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        View All Results
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </form>
             </div>
           </motion.div>
         )}

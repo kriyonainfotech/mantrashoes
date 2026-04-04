@@ -6,5 +6,6 @@ router.use("/products", require("./productRoutes"));
 router.use("/categories", require("./categoryRoutes"));
 router.use("/auth", require("./authRoutes"));
 router.use("/reels", require("./reelRoutes"));
+router.get("/search", require("../controllers/searchController").globalSearch);
 
 module.exports = router;

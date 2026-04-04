@@ -10,13 +10,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import ShopFilter from '@/components/ShopFilter';
 import { WHATSAPP_URL } from '@/lib/config';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 
 function getImg(img: any) {
   return typeof img === 'string' ? img : img?.url || '';
 }
 
-export default function Shop() {
+function ShopContent() {
   const { data, fetchData } = useAppStore();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -35,6 +37,20 @@ export default function Shop() {
     }
   }, [data?.products]);
 
+  const searchParams = useSearchParams();
+
+
+
+  // Update search filter when URL query changes
+  useEffect(() => {
+    const searchParam = searchParams.get('search');
+    if (searchParam !== null) {
+      setFilters(prev => ({ ...prev, search: searchParam }));
+    } else {
+      setFilters(prev => ({ ...prev, search: '' }));
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -47,7 +63,13 @@ export default function Shop() {
     // 0. Search
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      result = result.filter(p => p.name.toLowerCase().includes(q));
+      result = result.filter(p => 
+        p.name?.toLowerCase().includes(q) || 
+        p.category?.name?.toLowerCase().includes(q) ||
+        p.tags?.some((t: string) => t.toLowerCase().includes(q)) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.shortDescription?.toLowerCase().includes(q)
+      );
     }
 
     // 1. Filter by Category
@@ -263,5 +285,13 @@ export default function Shop() {
 
       <Footer data={data.sections.footer} theme={data.theme} />
     </main>
+  );
+}
+
+export default function Shop() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-8 bg-[#F8F5EF]" />}>
+      <ShopContent />
+    </Suspense>
   );
 }
