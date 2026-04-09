@@ -65,10 +65,6 @@ const productSchema = new mongoose.Schema(
         soleMaterial: {
             type: String,
         },
-        whatsapp: {
-            type: String,
-            required: true
-        },
         tags: [String],
 
         isFeatured: {

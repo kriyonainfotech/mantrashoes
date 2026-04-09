@@ -266,7 +266,7 @@ export default function CategoryPage() {
                             e.preventDefault();
                             e.stopPropagation();
                             const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
-                            window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${msg}`, '_blank');
+                            window.open(`${WHATSAPP_URL}/${data.globalSettings?.whatsappNumber || '917405040700'}?text=${msg}`, '_blank');
 
                           }}
                           className="w-full flex items-center justify-center gap-2 py-3 text-white"

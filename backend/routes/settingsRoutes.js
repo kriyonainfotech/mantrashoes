@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const uploadSettings = require("../middleware/settingsUploadMiddleware");
+const settingsController = require("../controllers/settingsController");
+
+// Get settings
+router.get("/", settingsController.getSettings);
+
+// Update settings
+router.put("/", settingsController.updateSettings);
 
 // Upload a single image for settings (hero, brand story, instagram gallery etc.)
 // Field name: "image"

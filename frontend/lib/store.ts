@@ -14,11 +14,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   fetchData: async (force = false) => {
     if (get().data && !force) return;
     try {
-      // Fetch all three sources in parallel
-      const [prodRes, catRes, settingsRes] = await Promise.all([
+      // Fetch all sources in parallel
+      const [prodRes, catRes, settingsRes, globalRes] = await Promise.all([
         fetch(`${API_URL}/products/get-products`),
         fetch(`${API_URL}/categories/get-categories`),
-        fetch('/api/data'),           // ← settings: hero, brandStory, instagram, reviews etc.
+        fetch('/api/data'),
+        fetch(`${API_URL}/settings`),
       ]);
 
       // Products
@@ -31,7 +32,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       const catData = await catRes.json();
       const categories = catData.categories || [];
 
-      // Settings (sections, reviews, theme) — gracefully fallback if unavailable
+      // Global Settings (DB-based)
+      let globalSettings = { whatsappNumber: '+917405040700' }; // Default
+      if (globalRes.ok) {
+        const gData = await globalRes.json();
+        if (gData.success) globalSettings = gData.settings;
+      }
+
+      // Sections data (File-based fallback)
       let settingsData: any = {};
       if (settingsRes.ok) {
         try { settingsData = await settingsRes.json(); } catch (_) {}
@@ -94,6 +102,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           reviews,
           products,
           categories,
+          globalSettings,
         },
       });
 

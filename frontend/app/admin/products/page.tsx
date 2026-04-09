@@ -60,26 +60,6 @@ export default function ProductsPage() {
     });
   }, [data?.products, selectedCategory, searchQuery]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [prodRes, catRes] = await Promise.all([
-          fetch(`${API_URL}/products/get-products`),
-          fetch(`${API_URL}/categories/get-categories`),
-        ]);
-        const products = await prodRes.json();
-        const cats = await catRes.json();
-        setCategories(cats.categories || []);
-        setData({ ...(data || {}), products: products.products || products || [] });
-      } catch (error) {
-        console.error('Failed to fetch data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
   const handleAddProduct = () => {
     setIsNewProduct(true);
     setEditingProduct({
@@ -92,7 +72,6 @@ export default function ProductsPage() {
       category: selectedCategory !== 'all' ? selectedCategory : '',
       brand: '',
       stock: 0,
-      whatsapp: '',
       material: '',
       soleMaterial: '',
       isFeatured: false,
@@ -476,9 +455,7 @@ export default function ProductsPage() {
                     onChange={(e) => setEditingProduct({ ...editingProduct, mrp: Number(e.target.value) })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-black focus:border-black text-sm"
                   />
-                </div>
-
-                <div>
+                                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
                   <input
                     type="text"
@@ -487,17 +464,7 @@ export default function ProductsPage() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-black focus:border-black text-sm"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
-                  <input
-                    type="text"
-                    value={editingProduct.whatsapp}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, whatsapp: e.target.value })}
-                    placeholder="e.g. 14155552671"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-black focus:border-black text-sm"
-                  />
-                </div>
+ </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Material</label>

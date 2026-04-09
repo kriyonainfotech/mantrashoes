@@ -208,11 +208,12 @@ function Toggle({ id, label, checked, onChange }: { id: string; label: string; c
 }
 
 // ─── Input ────────────────────────────────────────────────────────────────────
-function Field({ label, value, onChange, textarea, rows, placeholder }: any) {
+function Field({ label, value, onChange, textarea, rows, placeholder, hint }: any) {
   const cls = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all";
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      {hint && <p className="text-[10px] text-gray-400 mb-2 italic">{hint}</p>}
       {textarea
         ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows || 3} placeholder={placeholder} className={cls} />
         : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
@@ -245,18 +246,30 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // 1. Save local file settings (hero, sections etc)
       const res = await fetch('/api/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
+      // 2. Save Global MongoDB settings (whatsappNumber etc)
+      if (formData.globalSettings) {
+        await fetch(`${API_URL}/settings`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData.globalSettings),
+        });
+      }
+
       if (res.ok) {
         setData(formData);
-        toast.success('Settings saved successfully');
+        toast.success('All settings saved successfully');
       } else {
-        toast.error('Failed to save settings');
+        toast.error('Failed to save site data');
       }
-    } catch {
+    } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save settings');
     }
     setSaving(false);
@@ -271,7 +284,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-4xl pb-20">
 
       {/* Header */}
-      <div className="flex items-center justify-between sticky top-0 bg-gray-50 py-3 z-10 border-b border-gray-200 -mx-6 px-6">
+      <div className="flex items-center justify-between sticky top-0 py-3 z-10 border-b border-gray-200 -mx-6 px-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Site Settings</h2>
           <p className="text-sm text-gray-500 mt-0.5">Manage your homepage sections and content</p>
@@ -287,6 +300,18 @@ export default function SettingsPage() {
           }
         </button>
       </div>
+
+      {/* ── 0. Global Configuration ───────────────────────────────────────────── */}
+      <SectionCard title="Global Configuration" badge="Core System">
+        <p className="text-xs text-gray-400 -mt-2">Core system settings shared across all products and components.</p>
+        <Field
+          label="Global WhatsApp Number"
+          value={formData.globalSettings?.whatsappNumber || ''}
+          onChange={(v: string) => setFormData((p: any) => ({ ...p, globalSettings: { ...p.globalSettings, whatsappNumber: v } }))}
+          placeholder="e.g. 917405040700"
+          hint="Ordering phone used for all WhatsApp buttons. Enter with country code (e.g. 91...) no '+' sign."
+        />
+      </SectionCard>
 
       {/* ── 1. Hero Section ─────────────────────────────────────────────────── */}
       <SectionCard title="Hero Section" badge="Live on Homepage">
@@ -345,11 +370,11 @@ export default function SettingsPage() {
           checked={featured.enabled ?? true}
           onChange={(v) => sec('featured', { ...featured, enabled: v })}
         />
-        <Field 
-          label="Section Title" 
-          value={featured.title || ''} 
-          onChange={(v: string) => sec('featured', { ...featured, title: v })} 
-          placeholder="e.g. Featured Collection" 
+        <Field
+          label="Section Title"
+          value={featured.title || ''}
+          onChange={(v: string) => sec('featured', { ...featured, title: v })}
+          placeholder="e.g. Featured Collection"
         />
         <p className="text-xs text-gray-400">Products marked as "Feature on Homepage" in the product editor will show up here.</p>
       </SectionCard>
@@ -421,7 +446,7 @@ export default function SettingsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Rating (1–5)</label>
                   <div className="flex gap-1">
-                    {[1,2,3,4,5].map(star => (
+                    {[1, 2, 3, 4, 5].map(star => (
                       <button key={star} onClick={() => {
                         const r = [...formData.reviews]; r[idx] = { ...r[idx], rating: star };
                         setFormData((p: any) => ({ ...p, reviews: r }));

@@ -10,7 +10,7 @@ export default function Footer({ data, theme }: { data: any; theme: any }) {
   const { data: storeData } = useAppStore();
 
   const categories = (storeData?.categories || []).filter((c: any) => c.isActive);
-  const phone = data?.phone || '';
+  const phone = storeData?.globalSettings?.whatsappNumber || data?.phone || '';
   const email = data?.email || '';
   const address = data?.address || '';
   const whatsapp = phone.replace(/\D/g, '');

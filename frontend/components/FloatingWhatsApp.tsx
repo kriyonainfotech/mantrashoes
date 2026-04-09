@@ -7,10 +7,7 @@ import { WHATSAPP_URL } from '@/lib/config';
 
 export default function FloatingWhatsApp({ productName, size }: { productName?: string; size?: string }) {
   const { data } = useAppStore();
-  const phone = data?.sections?.footer?.phone || '';
-  const whatsapp = phone.replace(/\D/g, '');
-
-  if (!whatsapp) return null;
+  const whatsapp = data?.globalSettings?.whatsappNumber || '917405040700';
 
   const message = productName
     ? `Hi, I want to order "${productName}"${size ? `, Size: ${size}` : ''}.`
