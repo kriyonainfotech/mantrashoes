@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
-import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon, Search, ChevronDown, Check } from 'lucide-react';
 import DataTable from '@/components/admin/DataTable';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '@/lib/config';
@@ -17,6 +17,48 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCatOpen, setIsCatOpen] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          fetch(`${API_URL}/products/get-products`),
+          fetch(`${API_URL}/categories/get-categories`),
+        ]);
+        const products = await prodRes.json();
+        const cats = await catRes.json();
+        setCategories(cats.categories || []);
+        setData({ ...(data || {}), products: products.products || products || [] });
+      } catch (error) {
+        console.error('Failed to fetch data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const selectedCategoryName = useMemo(() => {
+    if (selectedCategory === 'all') return 'All Categories';
+    return categories.find(c => c._id === selectedCategory)?.name || 'Unknown Category';
+  }, [selectedCategory, categories]);
+
+  const filteredProducts = useMemo(() => {
+    return (data?.products || []).filter((p: any) => {
+      const pCat = typeof p.category === 'object' ? p.category?._id : p.category;
+      const matchesCategory = selectedCategory === 'all' || pCat === selectedCategory;
+
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery ||
+        p.name.toLowerCase().includes(q) ||
+        p.brand?.toLowerCase().includes(q) ||
+        (typeof p.category === 'object' && p.category?.name.toLowerCase().includes(q));
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [data?.products, selectedCategory, searchQuery]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -215,26 +257,64 @@ export default function ProductsPage() {
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-ink/20 mt-1">Inventory Management</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1 flex-wrap max-w-xl">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1.5 text-xs font-bold tracking-widest rounded-md transition-all ${selectedCategory === 'all' ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              ALL
-            </button>
-            {categories.map((cat: any) => (
-              <button
-                key={cat._id}
-                onClick={() => setSelectedCategory(cat._id)}
-                className={`px-3 py-1.5 text-xs font-bold tracking-widest rounded-md transition-all ${selectedCategory === cat._id ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                {cat.name.toUpperCase()}
-              </button>
-            ))}
+          
+          {/* Global Search Bar */}
+          <div className="relative group min-w-[300px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search by name, brand or category..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+            />
           </div>
+
+          {/* Custom Category Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsCatOpen(!isCatOpen)}
+              className="flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium hover:border-gray-400 transition-all min-w-[180px] justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400 font-normal">In:</span>
+                <span>{selectedCategoryName}</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isCatOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isCatOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsCatOpen(false)} />
+                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-20 overflow-hidden py-1 animate-in fade-in zoom-in duration-200">
+                  <button
+                    onClick={() => { setSelectedCategory('all'); setIsCatOpen(false); }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    <span className={selectedCategory === 'all' ? 'font-bold' : ''}>All Categories</span>
+                    {selectedCategory === 'all' && <Check className="w-4 h-4 text-black" />}
+                  </button>
+                  <div className="h-px bg-gray-50 mx-2" />
+                  <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                    {categories.map((cat: any) => (
+                      <button
+                        key={cat._id}
+                        onClick={() => { setSelectedCategory(cat._id); setIsCatOpen(false); }}
+                        className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        <span className={selectedCategory === cat._id ? 'font-bold' : ''}>{cat.name}</span>
+                        {selectedCategory === cat._id && <Check className="w-4 h-4 text-black" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           <button
             onClick={handleAddProduct}
-            className="flex items-center gap-2 px-6 py-3 bg-black text-white font-bebas text-lg tracking-widest hover:bg-gray-800 transition-all active:scale-95"
+            className="flex items-center gap-2 px-6 py-2.5 bg-black text-white font-bebas text-lg tracking-widest hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
           >
             <Plus className="w-5 h-5" />
             Add Product
@@ -243,10 +323,7 @@ export default function ProductsPage() {
       </div>
 
       <DataTable
-        data={(data?.products || []).filter((p: any) =>
-          selectedCategory === 'all' ||
-          (typeof p.category === 'object' ? p.category?._id : p.category) === selectedCategory
-        )}
+        data={filteredProducts}
         isLoading={loading}
         columns={[
           {

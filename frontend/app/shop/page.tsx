@@ -212,13 +212,13 @@ function ShopContent() {
                     className="group"
                   >
                     <Link href={`/product/${product._id || product.id}`} className="block">
-                      <div className="relative overflow-hidden" style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}>
+                      <div className="relative overflow-hidden flex items-center justify-center p-4" style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}>
                         {getImg(product.images?.[0]) ? (
                           <Image
                             src={getImg(product.images[0])}
                             alt={product.name}
                             fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
                             referrerPolicy="no-referrer"
                           />
                         ) : (

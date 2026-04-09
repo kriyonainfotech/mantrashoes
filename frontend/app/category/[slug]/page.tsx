@@ -48,17 +48,27 @@ export default function CategoryPage() {
       .catch(() => setNotFound(true));
   }, [slug]);
 
+  // Subcategories for the filter sidebar
+  const childCategories = useMemo(() => {
+    if (!category || !data?.categories) return [];
+    return data.categories.filter((c: any) => (c.parent?._id || c.parent) === category._id);
+  }, [data?.categories, category]);
+
   // Initial products before filtering
   const baseProducts = useMemo(() => {
     if (!data?.products || !category) return [];
-    return data.products.filter(
-      (p: any) =>
+
+    const childIds = childCategories.map((c: any) => c._id);
+    const targetCategoryIds = [category._id, ...childIds];
+
+    return data.products.filter((p: any) => {
+      const pCatId = p.category?._id || p.category;
+      return (
         p.isActive !== false &&
-        (p.category?._id === category._id ||
-          p.category?.slug === slug ||
-          p.category === category._id)
-    );
-  }, [data?.products, category, slug]);
+        (targetCategoryIds.includes(pCatId) || p.category?.slug === slug)
+      );
+    });
+  }, [data?.products, childCategories, category, slug]);
 
   // Initialize price range once data loads
   useEffect(() => {
@@ -77,6 +87,15 @@ export default function CategoryPage() {
       result = result.filter(p => p.name.toLowerCase().includes(q));
     }
 
+    // Filter by Sub-Category
+    if (filters.category && filters.category !== category._id) {
+      result = result.filter(p => {
+        const pCatId = p.category?._id || p.category || '';
+        const pCatSlug = p.category?.slug || '';
+        return pCatId === filters.category || pCatSlug === filters.category;
+      });
+    }
+
     // Filter by Price
     result = result.filter(p => p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]);
 
@@ -93,7 +112,7 @@ export default function CategoryPage() {
     if (filters.sort === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return result;
-  }, [baseProducts, filters]);
+  }, [baseProducts, filters, category?._id]);
 
   // ── Loading / Errors ──────────────────────────────────────────────────────────
   if (!data || !category) {
@@ -124,8 +143,8 @@ export default function CategoryPage() {
       <Navbar theme={data.theme} />
 
       {/* ── Category Header ── */}
-      <div className="w-full pt-40 pb-12 px-4 md:px-6">
-        <div className="max-w-7xl mx-auto text-center border-b border-black/5 pb-10">
+      <div className="w-full pt-40 pb-6 px-4 md:px-0">
+        <div className="max-w-7xl mx-auto text-center border-b border-black/5 pb-6">
           {category.parent?.name && (
             <p className="mb-3" style={{ fontFamily: 'var(--font-nunito)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#999' }}>
               {category.parent.name}
@@ -155,12 +174,12 @@ export default function CategoryPage() {
       </div>
 
       {/* ── Main Layout ── */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-12 flex gap-12">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex gap-12">
 
         {/* SIDEBAR (Desktop) */}
         <div className="hidden lg:block w-72 flex-shrink-0">
           <ShopFilter
-            categories={[]} // Empty because we are locked to this category
+            categories={childCategories}
             allProducts={baseProducts}
             activeFilters={filters}
             onChange={setFilters}
@@ -172,7 +191,7 @@ export default function CategoryPage() {
         {/* SIDEBAR (Mobile Overlay) */}
         <div className="lg:hidden">
           <ShopFilter
-            categories={[]}
+            categories={childCategories}
             allProducts={baseProducts}
             activeFilters={filters}
             onChange={setFilters}
@@ -202,14 +221,18 @@ export default function CategoryPage() {
                   className="group"
                 >
                   <Link href={`/product/${product._id || product.id}`} className="block">
-                    <div className="relative overflow-hidden" style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}>
+                    <div
+                      className="relative overflow-hidden flex items-center justify-center p-4" // Added flex, centering, and padding
+                      style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
+                    >
                       {getImg(product.images?.[0]) ? (
                         <Image
                           src={getImg(product.images[0])}
                           alt={product.name}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          referrerPolicy="no-referrer"
+                          /* 2. Change object-cover to object-contain */
+                          /* 3. Add mix-blend-multiply to remove the "off-white" box around the shoe */
+                          className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center"
@@ -217,18 +240,34 @@ export default function CategoryPage() {
                           No Image
                         </div>
                       )}
+                      {/* Featured badge */}
+                      {product.isFeatured && (
+                        <div className="absolute top-2 left-2 px-2 py-0.5"
+                          style={{ backgroundColor: '#1A1A1A', fontFamily: 'var(--font-nunito)', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
+                          Featured
+                        </div>
+                      )}
 
-                      {/* WhatsApp overlay */}
-                      <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                      {/* Discount badge */}
+                      {product.mrp > product.price && (
+                        <div className="absolute top-2 right-2 px-2 py-0.5"
+                          style={{ backgroundColor: '#E63946', fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 700, color: '#fff' }}>
+                          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                        </div>
+                      )}
+
+                      {/* WhatsApp overlay — slides up on hover */}
+                      <div
+                        className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0"
+                        style={{ transition: 'transform 220ms ease' }}
+                      >
                         <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            window.open(
-                              `${WHATSAPP_URL}/${product.whatsapp}?text=${encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`)}`,
+                            const msg = encodeURIComponent(`Hi, I want to order "${product.name}" — ₹${product.price}`);
+                            window.open(`${WHATSAPP_URL}/${product.whatsapp}?text=${msg}`, '_blank');
 
-                              '_blank'
-                            );
                           }}
                           className="w-full flex items-center justify-center gap-2 py-3 text-white"
                           style={{ background: '#0fb04a', fontFamily: 'var(--font-nunito)', fontSize: '12px', fontWeight: 600 }}
@@ -238,6 +277,7 @@ export default function CategoryPage() {
                         </button>
                       </div>
                     </div>
+
                     <div className="pt-3 pb-1">
                       <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#999', marginBottom: '2px' }}>
                         {product.category?.name}
