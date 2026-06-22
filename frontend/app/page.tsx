@@ -35,10 +35,16 @@ export default function Home() {
     );
   }
 
-  // Show top-level categories OR categories marked to show on home
-  const activeCategories = (data.categories || []).filter(
-    (c: any) => c.isActive && (c.showOnHome || !c.parent)
-  );
+  // Show all active categories that have products directly associated with them
+  const activeCategories = (data.categories || []).filter((c: any) => {
+    if (!c.isActive) return false;
+    
+    // Check if there are active products belonging to this category
+    return (data.products || []).some((p: any) => {
+      const pCatId = typeof p.category === 'string' ? p.category : p.category?._id;
+      return p.isActive !== false && pCatId === c._id;
+    });
+  });
 
   const hero = data.sections?.hero;
   const brandStory = data.sections?.brandStory;
@@ -61,24 +67,24 @@ export default function Home() {
       {/* 4. Featured Products Collection */}
       <FeaturedProducts data={data.sections?.featured} products={data.products} theme={data.theme} />
 
-      {/* 5. Category Sections — one per top-level active category */}
+      {/* 5. Category Sections — one per active category that has products */}
       {activeCategories.map((category: any) => {
-        // Collect all sub-category IDs
-        const subCategoryIds = (data.categories || [])
-          .filter((c: any) => (typeof c.parent === 'string' ? c.parent : c.parent?._id) === category._id)
-          .map((c: any) => c._id);
-        
-        const categoryIds = [category._id, ...subCategoryIds];
-
         const categoryProducts = (data.products || []).filter(
           (p: any) => {
             const pCatId = typeof p.category === 'string' ? p.category : p.category?._id;
-            return p.isActive !== false && categoryIds.includes(pCatId);
+            return p.isActive !== false && pCatId === category._id;
           }
         );
 
+        // Prepend parent name if it exists to make it clear (e.g. "Men's Collection - Casual Footwear")
+        const parentName = category.parent && typeof category.parent === 'object' ? category.parent.name : null;
+        const displayCategory = {
+          ...category,
+          name: parentName ? `${parentName} - ${category.name}` : category.name
+        };
+
         return (
-          <CategorySection key={category._id} category={category} products={categoryProducts} />
+          <CategorySection key={category._id} category={displayCategory} products={categoryProducts} />
         );
       })}
 

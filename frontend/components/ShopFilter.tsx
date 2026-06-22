@@ -11,6 +11,7 @@ interface FilterProps {
     priceRange: [number, number];
     sort: string;
     sizes: number[];
+    colors: string[];
     search: string;
   };
   onChange: (filters: any) => void;
@@ -43,6 +44,24 @@ export default function ShopFilter({
     return Array.from(sizes).sort((a, b) => a - b);
   }, [allProducts]);
 
+  const allColors = useMemo(() => {
+    const colorMap = new Map<string, string>(); // name -> hex
+    allProducts.forEach(p => {
+      p.colorMap?.forEach((c: any) => {
+        if (c.name && c.hex) colorMap.set(c.name, c.hex);
+      });
+      // Fallback: also extract from variants if no colorMap
+      if (!p.colorMap?.length) {
+        p.variants?.forEach((v: any) => {
+          if (v.color && !colorMap.has(v.color)) {
+            colorMap.set(v.color, v.color.toLowerCase());
+          }
+        });
+      }
+    });
+    return Array.from(colorMap.entries()).map(([name, hex]) => ({ name, hex }));
+  }, [allProducts]);
+
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, isMax: boolean) => {
     const val = parseInt(e.target.value) || 0;
     const newRange: [number, number] = isMax 
@@ -56,6 +75,13 @@ export default function ShopFilter({
       ? activeFilters.sizes.filter(s => s !== size)
       : [...activeFilters.sizes, size];
     onChange({ ...activeFilters, sizes: newSizes });
+  };
+
+  const toggleColor = (color: string) => {
+    const newColors = activeFilters.colors.includes(color)
+      ? activeFilters.colors.filter(c => c !== color)
+      : [...activeFilters.colors, color];
+    onChange({ ...activeFilters, colors: newColors });
   };
 
   return (
@@ -181,9 +207,41 @@ export default function ShopFilter({
           </div>
         )}
 
+        {/* 5. Colors Section */}
+        {allColors.length > 0 && (
+          <div className="mb-10">
+            <h3 className="filter-title">Colors</h3>
+            <div className="flex flex-wrap gap-3 mt-4">
+              {allColors.map((color) => (
+                <button
+                  key={color.name}
+                  onClick={() => toggleColor(color.name)}
+                  className="group relative"
+                  title={color.name}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${activeFilters.colors.includes(color.name) ? 'border-[#1A1A1A] scale-110' : 'border-black/10 hover:border-black/30'}`}
+                    style={{ backgroundColor: color.hex }}
+                  />
+                  {activeFilters.colors.includes(color.name) && (
+                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                      <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                  <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-semibold text-gray-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity" style={{ fontFamily: 'var(--font-nunito)' }}>
+                    {color.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Clear Filters */}
         <button 
-          onClick={() => onChange({ category: '', priceRange: [0, maxPrice], sort: 'newest', sizes: [] })}
+          onClick={() => onChange({ category: '', priceRange: [0, maxPrice], sort: 'newest', sizes: [], colors: [], search: '' })}
           className="w-full py-4 text-[12px] font-bold tracking-widest uppercase border border-black/10 hover:bg-black hover:fill-ivory hover:text-white transition-all"
           style={{ fontFamily: 'var(--font-nunito)' }}
         >

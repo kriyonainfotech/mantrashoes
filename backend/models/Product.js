@@ -42,6 +42,17 @@ const productSchema = new mongoose.Schema(
             }
         ],
 
+        colorMap: [
+            {
+                name: String,
+                hex: String,
+                image: {
+                    url: String,
+                    public_id: String
+                }
+            }
+        ],
+
         variants: [
             {
                 size: {

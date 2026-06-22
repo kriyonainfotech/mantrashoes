@@ -13,6 +13,8 @@ connectDB();
 // Middleware
 const allowedOrigins = [
   "http://localhost:3000",   // local dev (Next.js)
+  "http://localhost:3001",
+  "http://localhost:3002",
   "https://mantrashoes.com",
   "https://www.mantrashoes.com",
   "https://mantrashoes.vercel.app",
@@ -22,12 +24,13 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
+      console.log("CORS Origin checked:", origin);
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
+        console.log("CORS REJECTED origin:", origin);
         return callback(new Error("Not allowed by CORS"));
       }
     },

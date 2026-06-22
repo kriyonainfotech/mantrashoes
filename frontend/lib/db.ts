@@ -114,13 +114,42 @@ export const defaultData = {
   ]
 };
 
-// In-memory store for prototype
-let globalData = { ...defaultData };
+import fs from 'fs';
+import path from 'path';
+
+const dataFilePath = path.join(process.cwd(), 'lib/data.json');
 
 export function getData() {
-  return globalData;
+  try {
+    if (fs.existsSync(dataFilePath)) {
+      const fileContent = fs.readFileSync(dataFilePath, 'utf8');
+      return JSON.parse(fileContent);
+    }
+  } catch (error) {
+    console.error('Error reading data.json, returning defaultData:', error);
+  }
+  
+  // Create file with default data if it doesn't exist
+  try {
+    const dir = path.dirname(dataFilePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(dataFilePath, JSON.stringify(defaultData, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error writing default data.json:', error);
+  }
+  return defaultData;
 }
 
 export function saveData(data: any) {
-  globalData = { ...globalData, ...data };
+  try {
+    const dir = path.dirname(dataFilePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error saving data.json:', error);
+  }
 }

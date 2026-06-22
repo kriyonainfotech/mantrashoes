@@ -26,6 +26,7 @@ function ShopContent() {
     priceRange: [0, 100000] as [number, number],
     sort: 'newest',
     sizes: [] as number[],
+    colors: [] as string[],
     search: '',
   });
 
@@ -89,6 +90,18 @@ function ShopContent() {
       result = result.filter(p =>
         p.variants?.some((v: any) => filters.sizes.includes(v.size))
       );
+    }
+
+    // 3.5 Filter by Colors
+    if (filters.colors.length > 0) {
+      result = result.filter(p => {
+        // Check colorMap first
+        const productColors = p.colorMap?.map((c: any) => c.name) || [];
+        // Fallback to variant colors
+        const variantColors = p.variants?.map((v: any) => v.color).filter(Boolean) || [];
+        const allProductColors = [...new Set([...productColors, ...variantColors])];
+        return filters.colors.some(c => allProductColors.includes(c));
+      });
     }
 
     // 4. Sort
@@ -191,7 +204,7 @@ function ShopContent() {
               <button
                 onClick={() => {
                   const max = Math.ceil(Math.max(...(data?.products || []).map((p: any) => p.price), 0) / 1000) * 1000 || 10000;
-                  setFilters({ category: '', priceRange: [0, max], sort: 'newest', sizes: [], search: '' });
+                  setFilters({ category: '', priceRange: [0, max], sort: 'newest', sizes: [], colors: [], search: '' });
                 }}
                 className="mt-6 text-[13px] font-bold underline"
               >
@@ -273,6 +286,27 @@ function ShopContent() {
                             </span>
                           )}
                         </div>
+                        {/* Color Swatches */}
+                        {(product.colorMap?.length > 0 || product.variants?.some((v: any) => v.color)) && (
+                          <div className="flex items-center gap-1.5 mt-2">
+                            {(product.colorMap?.length > 0 
+                              ? product.colorMap.slice(0, 5).map((c: any) => ({ name: c.name, hex: c.hex }))
+                              : [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].slice(0, 5).map((c: string) => ({ name: c, hex: c.toLowerCase() }))
+                            ).map((color: any, ci: number) => (
+                              <div
+                                key={ci}
+                                className="w-3.5 h-3.5 rounded-full border border-black/10"
+                                style={{ backgroundColor: color.hex }}
+                                title={color.name}
+                              />
+                            ))}
+                            {((product.colorMap?.length || 0) > 5 || ([...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].length > 5 && !product.colorMap?.length)) && (
+                              <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '9px', color: '#999' }}>
+                                +{(product.colorMap?.length || [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].length) - 5}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </Link>
                   </motion.div>

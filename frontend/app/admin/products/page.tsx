@@ -77,7 +77,8 @@ export default function ProductsPage() {
       isFeatured: false,
       isActive: true,
       variants: [],
-      tags: []
+      tags: [],
+      colorMap: []
     });
   };
 
@@ -106,10 +107,35 @@ export default function ProductsPage() {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddVariant = () => {
+  // ── ColorMap handlers ──
+  const handleAddColor = () => {
     setEditingProduct((prev: any) => ({
       ...prev,
-      variants: [...(prev.variants || []), { size: 0, color: '', stock: 0, sku: '' }]
+      colorMap: [...(prev.colorMap || []), { name: '', hex: '#000000' }]
+    }));
+  };
+
+  const handleUpdateColor = (index: number, field: string, value: any) => {
+    setEditingProduct((prev: any) => {
+      const newColorMap = [...(prev.colorMap || [])];
+      newColorMap[index] = { ...newColorMap[index], [field]: value };
+      return { ...prev, colorMap: newColorMap };
+    });
+  };
+
+  const handleRemoveColor = (index: number) => {
+    setEditingProduct((prev: any) => ({
+      ...prev,
+      colorMap: (prev.colorMap || []).filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  // ── Variant handlers ──
+  const handleAddVariant = () => {
+    const defaultColor = editingProduct?.colorMap?.[0]?.name || '';
+    setEditingProduct((prev: any) => ({
+      ...prev,
+      variants: [...(prev.variants || []), { size: 0, color: defaultColor, stock: 0, sku: '' }]
     }));
   };
 
@@ -125,6 +151,23 @@ export default function ProductsPage() {
     setEditingProduct((prev: any) => ({
       ...prev,
       variants: prev.variants.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  // ── Quick-add sizes for a color ──
+  const handleQuickAddSizes = (color: string, fromSize: number, toSize: number, stock: number) => {
+    if (fromSize > toSize || !color) return;
+    const newVariants: any[] = [];
+    for (let s = fromSize; s <= toSize; s++) {
+      // Don't add if variant already exists
+      const exists = editingProduct.variants?.some((v: any) => v.size === s && v.color === color);
+      if (!exists) {
+        newVariants.push({ size: s, color, stock, sku: '' });
+      }
+    }
+    setEditingProduct((prev: any) => ({
+      ...prev,
+      variants: [...(prev.variants || []), ...newVariants]
     }));
   };
 
@@ -180,7 +223,7 @@ export default function ProductsPage() {
           value = value._id;
         }
 
-        if (key === 'variants' || key === 'tags') {
+        if (key === 'variants' || key === 'tags' || key === 'colorMap') {
           formData.append(key, JSON.stringify(value));
         } else {
           formData.append(key, value);
@@ -431,9 +474,33 @@ export default function ProductsPage() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-black focus:border-black text-sm"
                   >
                     <option value="">Select Category</option>
-                    {categories.map((cat: any) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
+                    {categories
+                      .filter((cat: any) => !cat.parent)
+                      .map((rootCat: any) => {
+                        const subCats = categories.filter((c: any) => {
+                          const parentId = c.parent && typeof c.parent === 'object' ? c.parent._id : c.parent;
+                          return parentId === rootCat._id;
+                        });
+
+                        if (subCats.length > 0) {
+                          return (
+                            <optgroup key={rootCat._id} label={rootCat.name}>
+                              <option value={rootCat._id}>{rootCat.name} (Direct)</option>
+                              {subCats.map((sub: any) => (
+                                <option key={sub._id} value={sub._id}>
+                                  {sub.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          );
+                        }
+
+                        return (
+                          <option key={rootCat._id} value={rootCat._id}>
+                            {rootCat.name}
+                          </option>
+                        );
+                      })}
                   </select>
                 </div>
 
@@ -496,16 +563,124 @@ export default function ProductsPage() {
                   />
                 </div>
 
+                {/* ── Color Options (ColorMap) ── */}
                 <div className="md:col-span-2 space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-gray-700">Variants (Size, Color, Stock, SKU)</label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Color Options</label>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Define available colors with hex codes. These show as swatches on the product page.</p>
+                    </div>
+                    <button
+                      onClick={handleAddColor}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1 font-medium"
+                    >
+                      <Plus className="w-3 h-3" /> Add Color
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {editingProduct.colorMap?.map((color: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <div
+                          className="w-8 h-8 rounded-full border-2 border-gray-200 flex-shrink-0"
+                          style={{ backgroundColor: color.hex || '#000' }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Color Name (e.g., Ocean Blue)"
+                          value={color.name}
+                          onChange={(e) => handleUpdateColor(idx, 'name', e.target.value)}
+                          className="flex-1 border border-gray-300 rounded px-2 py-1.5 text-xs"
+                        />
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={color.hex || '#000000'}
+                            onChange={(e) => handleUpdateColor(idx, 'hex', e.target.value)}
+                            className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                            title="Pick color"
+                          />
+                          <input
+                            type="text"
+                            value={color.hex || ''}
+                            onChange={(e) => handleUpdateColor(idx, 'hex', e.target.value)}
+                            placeholder="#000000"
+                            className="w-20 border border-gray-300 rounded px-2 py-1.5 text-xs font-mono"
+                          />
+                        </div>
+                        <button onClick={() => handleRemoveColor(idx)} className="text-red-500 hover:text-red-700 p-1">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── Variants (Size, Color, Stock, SKU) ── */}
+                <div className="md:col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Variants (Size × Color × Stock)</label>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Each variant represents a specific size-color combination with its own stock.</p>
+                    </div>
                     <button
                       onClick={handleAddVariant}
-                      className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded flex items-center gap-1"
+                      className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1 font-medium"
                     >
                       <Plus className="w-3 h-3" /> Add Variant
                     </button>
                   </div>
+
+                  {/* Quick-add sizes */}
+                  {editingProduct.colorMap?.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                      <p className="text-[10px] font-bold text-blue-700 mb-2 uppercase tracking-wider">Quick Add Sizes</p>
+                      <div className="flex items-end gap-2 flex-wrap">
+                        <div>
+                          <label className="text-[10px] text-gray-500 block mb-1">Color</label>
+                          <select id="qa-color" className="border border-gray-300 rounded px-2 py-1 text-xs">
+                            {editingProduct.colorMap.map((c: any, i: number) => (
+                              <option key={i} value={c.name}>{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-gray-500 block mb-1">From Size</label>
+                          <input id="qa-from" type="number" defaultValue={6} className="w-16 border border-gray-300 rounded px-2 py-1 text-xs" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-gray-500 block mb-1">To Size</label>
+                          <input id="qa-to" type="number" defaultValue={10} className="w-16 border border-gray-300 rounded px-2 py-1 text-xs" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-gray-500 block mb-1">Stock Each</label>
+                          <input id="qa-stock" type="number" defaultValue={10} className="w-16 border border-gray-300 rounded px-2 py-1 text-xs" />
+                        </div>
+                        <button
+                          onClick={() => {
+                            const color = (document.getElementById('qa-color') as HTMLSelectElement)?.value;
+                            const from = Number((document.getElementById('qa-from') as HTMLInputElement)?.value);
+                            const to = Number((document.getElementById('qa-to') as HTMLInputElement)?.value);
+                            const stock = Number((document.getElementById('qa-stock') as HTMLInputElement)?.value);
+                            handleQuickAddSizes(color, from, to, stock);
+                          }}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700 transition-colors"
+                        >
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Variant headers */}
+                  {editingProduct.variants?.length > 0 && (
+                    <div className="grid grid-cols-5 gap-2 px-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Size (UK)</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Color</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stock</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">SKU</span>
+                      <span></span>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     {editingProduct.variants?.map((variant: any, idx: number) => (
                       <div key={idx} className="grid grid-cols-5 gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
@@ -514,28 +689,49 @@ export default function ProductsPage() {
                           placeholder="Size"
                           value={variant.size}
                           onChange={(e) => handleUpdateVariant(idx, 'size', Number(e.target.value))}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
+                          className="border border-gray-300 rounded px-2 py-1.5 text-xs"
                         />
-                        <input
-                          type="text"
-                          placeholder="Color"
-                          value={variant.color}
-                          onChange={(e) => handleUpdateVariant(idx, 'color', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Stock"
-                          value={variant.stock}
-                          onChange={(e) => handleUpdateVariant(idx, 'stock', Number(e.target.value))}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
-                        />
+                        {editingProduct.colorMap?.length > 0 ? (
+                          <select
+                            value={variant.color}
+                            onChange={(e) => handleUpdateVariant(idx, 'color', e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1.5 text-xs"
+                          >
+                            <option value="">Select Color</option>
+                            {editingProduct.colorMap.map((c: any, ci: number) => (
+                              <option key={ci} value={c.name}>{c.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="Color"
+                            value={variant.color}
+                            onChange={(e) => handleUpdateVariant(idx, 'color', e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1.5 text-xs"
+                          />
+                        )}
+                        <div className="relative">
+                          <input
+                            type="number"
+                            placeholder="Stock"
+                            value={variant.stock}
+                            onChange={(e) => handleUpdateVariant(idx, 'stock', Number(e.target.value))}
+                            className="border border-gray-300 rounded px-2 py-1.5 text-xs w-full"
+                          />
+                          {variant.stock === 0 && (
+                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500" title="Out of stock" />
+                          )}
+                          {variant.stock > 0 && variant.stock <= 3 && (
+                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-orange-500" title="Low stock" />
+                          )}
+                        </div>
                         <input
                           type="text"
                           placeholder="SKU"
                           value={variant.sku}
                           onChange={(e) => handleUpdateVariant(idx, 'sku', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
+                          className="border border-gray-300 rounded px-2 py-1.5 text-xs"
                         />
                         <button onClick={() => handleRemoveVariant(idx)} className="text-red-500 hover:text-red-700 p-1 flex justify-center">
                           <Trash2 className="w-4 h-4" />

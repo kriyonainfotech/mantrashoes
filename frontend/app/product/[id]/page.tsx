@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Image from 'next/image';
-import { MessageCircle, Heart, ChevronDown, Star, ZoomIn } from 'lucide-react';
+import { MessageCircle, Heart, ChevronDown, Star, ZoomIn, Ruler } from 'lucide-react';
 import Link from 'next/link';
 import { WHATSAPP_URL } from '@/lib/config';
 
@@ -136,16 +136,54 @@ export default function ProductPage() {
 
   const images = product.images || [];
   const variants = product.variants || [];
+  const colorMap = product.colorMap || [];
   const hasDiscount = product.mrp > product.price;
   const discountPct = hasDiscount ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
   const categoryName = product.category?.name || '';
   const categorySlug = product.category?.slug || '';
 
-  const colors = [...new Set(variants.map((v: any) => v.color).filter(Boolean))] as string[];
-  const sizesForColor = colors.length > 0 ? variants.filter((v: any) => v.color === colors[selectedColor]) : variants;
+  // Build color list from colorMap first, fallback to variant colors
+  const colors = useMemo(() => {
+    if (colorMap.length > 0) {
+      return colorMap.map((c: any) => ({ name: c.name, hex: c.hex || c.name.toLowerCase(), image: c.image }));
+    }
+    const uniqueColors = [...new Set(variants.map((v: any) => v.color).filter(Boolean))] as string[];
+    return uniqueColors.map(c => ({ name: c, hex: c.toLowerCase(), image: null }));
+  }, [colorMap, variants]);
+
+  const selectedColorName = colors[selectedColor]?.name || '';
+  const sizesForColor = useMemo(() => {
+    if (colors.length > 0) {
+      return variants.filter((v: any) => v.color === selectedColorName);
+    }
+    return variants;
+  }, [variants, colors, selectedColorName]);
+
+  // Get the selected variant for stock check
+  const selectedVariant = selectedSize !== null ? sizesForColor[selectedSize] : null;
+  const stockStatus = useMemo(() => {
+    if (!selectedVariant) return null;
+    if (selectedVariant.stock === 0) return { label: 'Out of Stock', color: '#dc2626', bg: '#fef2f2' };
+    if (selectedVariant.stock <= 3) return { label: `Only ${selectedVariant.stock} left!`, color: '#d97706', bg: '#fffbeb' };
+    return { label: 'In Stock', color: '#16a34a', bg: '#f0fdf4' };
+  }, [selectedVariant]);
+
+  // Switch image when color is selected (if colorMap has per-color images)
+  useEffect(() => {
+    if (colors[selectedColor]?.image?.url) {
+      // Find if this color image matches any existing image, otherwise show the color image
+      const colorImgUrl = colors[selectedColor].image.url;
+      const matchIdx = images.findIndex((img: any) => getImg(img) === colorImgUrl);
+      if (matchIdx >= 0) {
+        setActiveImage(matchIdx);
+      } else {
+        setActiveImage(0); // Reset to first image
+      }
+    }
+  }, [selectedColor]);
 
   const whatsappMsg = encodeURIComponent(
-    `Hi, I want to order "${product.name}"${selectedSize !== null ? `, Size: ${sizesForColor[selectedSize]?.size}` : ''}${colors.length > 0 ? `, Color: ${colors[selectedColor]}` : ''} — ₹${product.price?.toLocaleString()}.`
+    `Hi, I want to order "${product.name}"${selectedSize !== null ? `, Size: UK ${sizesForColor[selectedSize]?.size}` : ''}${colors.length > 0 ? `, Color: ${selectedColorName}` : ''}${selectedVariant?.sku ? `, SKU: ${selectedVariant.sku}` : ''} — ₹${product.price?.toLocaleString()}.`
   );
 
   const related = (data.products || [])
@@ -335,69 +373,138 @@ export default function ProductPage() {
               </span>
             </div>
 
+            {/* ── Color Selection ── */}
             {colors.length > 0 && (
               <div className="mb-8">
-                <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 500, color: '#0a0a0a', marginBottom: '12px' }}>
-                  SELECT COLOR: <span className="text-[#888] font-light ml-2">{colors[selectedColor]}</span>
+                <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.08em', color: '#0a0a0a', marginBottom: '14px', textTransform: 'uppercase' }}>
+                  Color: <span style={{ fontWeight: 300, textTransform: 'capitalize', letterSpacing: '0', color: '#555' }}>{selectedColorName}</span>
                 </p>
-                <div className="flex gap-3">
-                  {colors.map((color, i) => (
+                <div className="flex gap-3 flex-wrap">
+                  {colors.map((color: any, i: number) => (
                     <button
                       key={i}
                       onClick={() => { setSelectedColor(i); setSelectedSize(null); }}
-                      style={{
-                        width: '32px', height: '32px',
-                        backgroundColor: color.toLowerCase(),
-                        borderRadius: '50%',
-                        border: selectedColor === i ? '2px solid #0a0a0a' : '1px solid rgba(0,0,0,0.1)',
-                        outline: selectedColor === i ? '1px solid #0a0a0a' : 'none',
-                        outlineOffset: '3px'
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {sizesForColor.length > 0 && (
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 500, color: '#0a0a0a' }}>
-                    SELECT SIZE: {selectedSize !== null && <span className="text-[#888] font-light ml-2">UK {sizesForColor[selectedSize]?.size}</span>}
-                  </p>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {sizesForColor.map((v: any, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedSize(idx)}
-                      disabled={v.stock === 0}
-                      style={{
-                        height: '52px',
-                        border: '1px solid',
-                        borderColor: selectedSize === idx ? '#0a0a0a' : 'rgba(10,10,10,0.12)',
-                        backgroundColor: selectedSize === idx ? '#0a0a0a' : 'transparent',
-                        color: selectedSize === idx ? 'white' : v.stock === 0 ? '#ccc' : '#0a0a0a',
-                        fontFamily: 'var(--font-dm-sans)',
-                        fontSize: '14px',
-                        fontWeight: selectedSize === idx ? 500 : 300,
-                        cursor: v.stock === 0 ? 'not-allowed' : 'pointer',
-                        transition: 'all 200ms ease',
-                      }}
+                      className="relative group"
+                      title={color.name}
                     >
-                      {v.size}
+                      <div
+                        className="transition-all duration-200"
+                        style={{
+                          width: '36px', height: '36px',
+                          backgroundColor: color.hex,
+                          borderRadius: '50%',
+                          border: selectedColor === i ? '2.5px solid #0a0a0a' : '1.5px solid rgba(0,0,0,0.1)',
+                          outline: selectedColor === i ? '2px solid #0a0a0a' : 'none',
+                          outlineOffset: '3px',
+                          boxShadow: selectedColor === i ? '0 2px 8px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.08)',
+                          transform: selectedColor === i ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      />
+                      {/* Color name tooltip */}
+                      <span
+                        className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                        style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '9px', fontWeight: 500, color: '#888', letterSpacing: '0.04em' }}
+                      >
+                        {color.name}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
+            {/* ── Size Selection (Nike-style Grid) ── */}
+            {sizesForColor.length > 0 && (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.08em', color: '#0a0a0a', textTransform: 'uppercase' }}>
+                    Size: {selectedSize !== null && <span style={{ fontWeight: 300, letterSpacing: '0', color: '#555' }}>UK {sizesForColor[selectedSize]?.size}</span>}
+                  </p>
+                  <button
+                    className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
+                    style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '11px', fontWeight: 500, color: '#555', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                  >
+                    <Ruler className="w-3.5 h-3.5" />
+                    Size Guide
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  {sizesForColor.map((v: any, idx: number) => {
+                    const isSelected = selectedSize === idx;
+                    const isOutOfStock = v.stock === 0;
+                    const isLowStock = v.stock > 0 && v.stock <= 3;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedSize(idx)}
+                        disabled={isOutOfStock}
+                        className="relative group"
+                        style={{
+                          height: '52px',
+                          borderRadius: '6px',
+                          border: '1.5px solid',
+                          borderColor: isSelected ? '#0a0a0a' : isOutOfStock ? 'rgba(10,10,10,0.06)' : 'rgba(10,10,10,0.12)',
+                          backgroundColor: isSelected ? '#0a0a0a' : isOutOfStock ? '#fafafa' : 'transparent',
+                          color: isSelected ? 'white' : isOutOfStock ? '#ccc' : '#0a0a0a',
+                          fontFamily: 'var(--font-dm-sans)',
+                          fontSize: '14px',
+                          fontWeight: isSelected ? 600 : 400,
+                          cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                          transition: 'all 200ms ease',
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {/* Strikethrough for out-of-stock */}
+                        {isOutOfStock && (
+                          <div style={{
+                            position: 'absolute', top: '50%', left: '0', right: '0',
+                            height: '1px', backgroundColor: '#ddd',
+                            transform: 'rotate(-20deg)', transformOrigin: 'center',
+                          }} />
+                        )}
+                        UK {v.size}
+                        {/* Low stock indicator dot */}
+                        {isLowStock && !isSelected && (
+                          <div style={{
+                            position: 'absolute', top: '6px', right: '6px',
+                            width: '5px', height: '5px', borderRadius: '50%',
+                            backgroundColor: '#d97706',
+                          }} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Stock Status Indicator */}
+                {stockStatus && (
+                  <div
+                    className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg"
+                    style={{ backgroundColor: stockStatus.bg, border: `1px solid ${stockStatus.color}20` }}
+                  >
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: stockStatus.color }} />
+                    <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '12px', fontWeight: 600, color: stockStatus.color }}>
+                      {stockStatus.label}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col gap-3 mb-10">
               <button
                 onClick={() => window.open(`${WHATSAPP_URL}/${data?.globalSettings?.whatsappNumber || '917405040700'}?text=${whatsappMsg}`, '_blank')}
-                className="w-full flex items-center justify-center gap-3 py-5 text-white bg-[#0fb04a] font-bold text-[15px] hover:-translate-y-1 transition-transform"
+                disabled={selectedVariant?.stock === 0}
+                className="w-full flex items-center justify-center gap-3 py-5 text-white font-bold text-[15px] transition-all"
+                style={{
+                  backgroundColor: selectedVariant?.stock === 0 ? '#ccc' : '#0fb04a',
+                  cursor: selectedVariant?.stock === 0 ? 'not-allowed' : 'pointer',
+                  transform: selectedVariant?.stock === 0 ? 'none' : undefined,
+                }}
+                onMouseEnter={e => { if (selectedVariant?.stock !== 0) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
               >
-                <MessageCircle className="w-5 h-5" /> ORDER ON WHATSAPP
+                <MessageCircle className="w-5 h-5" /> {selectedVariant?.stock === 0 ? 'OUT OF STOCK' : 'ORDER ON WHATSAPP'}
               </button>
 
               <button

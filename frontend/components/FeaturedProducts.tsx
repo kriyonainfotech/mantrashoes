@@ -126,6 +126,36 @@ export default function FeaturedProducts({ data, products, theme }: { data: any,
                       </span>
                     )}
                   </div>
+                  {/* Color Swatches & Size Range */}
+                  {(product.colorMap?.length > 0 || product.variants?.some((v: any) => v.color)) && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      {(product.colorMap?.length > 0
+                        ? product.colorMap.slice(0, 5).map((c: any) => ({ name: c.name, hex: c.hex }))
+                        : [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].slice(0, 5).map((c: any) => ({ name: c, hex: c.toLowerCase() }))
+                      ).map((color: any, ci: number) => (
+                        <div
+                          key={ci}
+                          className="w-3 h-3 rounded-full border border-black/10"
+                          style={{ backgroundColor: color.hex }}
+                          title={color.name}
+                        />
+                      ))}
+                      {((product.colorMap?.length || 0) > 5 || ([...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].length > 5 && !product.colorMap?.length)) && (
+                        <span style={{ fontFamily: 'var(--font-nunito)', fontSize: '9px', color: '#999' }}>
+                          +{(product.colorMap?.length || [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].length) - 5}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {product.variants?.length > 0 && (
+                    <p style={{ fontFamily: 'var(--font-nunito)', fontSize: '10px', fontWeight: 500, color: '#aaa', marginTop: '3px' }}>
+                      {(() => {
+                        const sizes = product.variants.map((v: any) => v.size).filter(Boolean).sort((a: number, b: number) => a - b);
+                        if (sizes.length === 0) return null;
+                        return `Sizes: ${sizes[0]}–${sizes[sizes.length - 1]}`;
+                      })()}
+                    </p>
+                  )}
                 </div>
               </Link>
             </motion.div>

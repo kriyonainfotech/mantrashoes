@@ -12,6 +12,7 @@ exports.createProduct = async (req, res) => {
             discount,
             category,
             brand,
+            colorMap,
             variants,
             material,
             soleMaterial,
@@ -38,6 +39,17 @@ exports.createProduct = async (req, res) => {
             }
         }
 
+        let parsedColorMap = [];
+        if (colorMap) {
+            try {
+                parsedColorMap = typeof colorMap === 'string' ? JSON.parse(colorMap) : colorMap;
+                if (!Array.isArray(parsedColorMap)) parsedColorMap = [];
+            } catch (e) {
+                console.error('Error parsing colorMap:', e);
+                parsedColorMap = [];
+            }
+        }
+
         let parsedTags = [];
         if (tags) {
             try {
@@ -60,6 +72,7 @@ exports.createProduct = async (req, res) => {
             category,
             brand,
             images,
+            colorMap: parsedColorMap,
             variants: parsedVariants,
             material,
             soleMaterial,
@@ -138,6 +151,7 @@ exports.updateProduct = async (req, res) => {
             discount,
             category,
             brand,
+            colorMap,
             variants,
             soleMaterial,
             whatsapp,
@@ -154,6 +168,17 @@ exports.updateProduct = async (req, res) => {
             } catch (e) {
                 console.error("Error parsing variants in update:", e);
                 parsedVariants = [];
+            }
+        }
+
+        let parsedColorMap = undefined;
+        if (colorMap) {
+            try {
+                parsedColorMap = typeof colorMap === 'string' ? JSON.parse(colorMap) : colorMap;
+                if (!Array.isArray(parsedColorMap)) parsedColorMap = [];
+            } catch (e) {
+                console.error('Error parsing colorMap:', e);
+                parsedColorMap = [];
             }
         }
 
@@ -177,6 +202,7 @@ exports.updateProduct = async (req, res) => {
             discount,
             category,
             brand,
+            colorMap: parsedColorMap,
             variants: parsedVariants,
             soleMaterial,
             whatsapp,
