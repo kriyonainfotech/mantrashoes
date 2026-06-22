@@ -29,6 +29,7 @@ export default function CategoryPage() {
     priceRange: [0, 100000] as [number, number],
     sort: 'newest',
     sizes: [] as number[],
+    colors: [] as string[],
     search: '',
   });
 
@@ -310,7 +311,7 @@ export default function CategoryPage() {
               <button
                 onClick={() => {
                   const max = Math.ceil(Math.max(...(baseProducts || []).map((p: any) => p.price), 0) / 1000) * 1000 || 10000;
-                  setFilters({ category: category._id, priceRange: [0, max], sort: 'newest', sizes: [], search: '' });
+                  setFilters({ category: category._id, priceRange: [0, max], sort: 'newest', sizes: [], colors: [], search: '' });
                 }}
                 className="mt-6 text-[13px] font-bold underline"
               >

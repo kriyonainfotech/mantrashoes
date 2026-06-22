@@ -291,7 +291,7 @@ function ShopContent() {
                           <div className="flex items-center gap-1.5 mt-2">
                             {(product.colorMap?.length > 0 
                               ? product.colorMap.slice(0, 5).map((c: any) => ({ name: c.name, hex: c.hex }))
-                              : [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].slice(0, 5).map((c: string) => ({ name: c, hex: c.toLowerCase() }))
+                              : [...new Set(product.variants?.map((v: any) => v.color).filter(Boolean))].slice(0, 5).map((c: any) => ({ name: c, hex: c.toLowerCase() }))
                             ).map((color: any, ci: number) => (
                               <div
                                 key={ci}
