@@ -21,6 +21,7 @@ interface Product {
   category: any;
   whatsapp: string;
   isFeatured?: boolean;
+  colorMap?: any[];
 }
 
 interface Category {
