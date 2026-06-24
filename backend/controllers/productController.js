@@ -22,11 +22,27 @@ exports.createProduct = async (req, res) => {
             isActive
         } = req.body;
 
-        const images = req.files ? req.files.map((file, index) => ({
-            url: file.path,
-            public_id: file.filename,
-            index: index
-        })) : [];
+        const images = [];
+        const colorImagesMap = {};
+
+        if (req.files && req.files.length > 0) {
+            req.files.forEach((file) => {
+                const imgData = {
+                    url: file.path,
+                    public_id: file.filename,
+                };
+                if (file.fieldname === 'images') {
+                    images.push(imgData);
+                } else if (file.fieldname.startsWith('colorImages_')) {
+                    const parts = file.fieldname.split('_');
+                    const colorIndex = parts[1];
+                    if (!colorImagesMap[colorIndex]) {
+                        colorImagesMap[colorIndex] = [];
+                    }
+                    colorImagesMap[colorIndex].push(imgData);
+                }
+            });
+        }
 
         let parsedVariants = [];
         if (variants) {
@@ -50,10 +66,18 @@ exports.createProduct = async (req, res) => {
             }
         }
 
+        if (parsedColorMap.length === 0) {
+            return res.status(400).json({ message: "At least one color must be added to the product." });
+        }
+
+        parsedColorMap = parsedColorMap.map((color, idx) => {
+            color.images = colorImagesMap[idx] || [];
+            return color;
+        });
+
         let parsedTags = [];
         if (tags) {
             try {
-                // If it looks like a JSON array, parse it. Otherwise, handle as string or array.
                 parsedTags = typeof tags === 'string' && tags.trim().startsWith('[') 
                     ? JSON.parse(tags) 
                     : (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t));
@@ -193,6 +217,50 @@ exports.updateProduct = async (req, res) => {
             }
         }
 
+        let existingImages = [];
+        if (req.body.existingImages) {
+            try {
+                existingImages = typeof req.body.existingImages === 'string' ? JSON.parse(req.body.existingImages) : req.body.existingImages;
+                if (!Array.isArray(existingImages)) existingImages = [];
+            } catch (e) {
+                existingImages = [];
+            }
+        }
+
+        const newImages = [];
+        const newColorImagesMap = {};
+
+        if (req.files && req.files.length > 0) {
+            req.files.forEach((file) => {
+                const imgData = {
+                    url: file.path,
+                    public_id: file.filename,
+                };
+                if (file.fieldname === 'images') {
+                    newImages.push(imgData);
+                } else if (file.fieldname.startsWith('colorImages_')) {
+                    const parts = file.fieldname.split('_');
+                    const colorIndex = parts[1];
+                    if (!newColorImagesMap[colorIndex]) {
+                        newColorImagesMap[colorIndex] = [];
+                    }
+                    newColorImagesMap[colorIndex].push(imgData);
+                }
+            });
+        }
+
+        if (parsedColorMap && parsedColorMap.length > 0) {
+            parsedColorMap = parsedColorMap.map((color, idx) => {
+                // Ensure color.images is an array
+                color.images = Array.isArray(color.images) ? color.images : [];
+                // Append any newly uploaded images for this color
+                if (newColorImagesMap[idx]) {
+                    color.images.push(...newColorImagesMap[idx]);
+                }
+                return color;
+            });
+        }
+
         const updateData = {
             name,
             slug,
@@ -202,21 +270,24 @@ exports.updateProduct = async (req, res) => {
             discount,
             category,
             brand,
-            colorMap: parsedColorMap,
-            variants: parsedVariants,
             soleMaterial,
             whatsapp,
-            tags: parsedTags,
             isFeatured,
             isActive
         };
 
-        if (req.files && req.files.length > 0) {
-            updateData.images = req.files.map((file, index) => ({
-                url: file.path,
-                public_id: file.filename,
-                index: index
-            }));
+        if (parsedColorMap !== undefined) {
+            if (parsedColorMap.length === 0) {
+                return res.status(400).json({ message: "At least one color must be added to the product." });
+            }
+            updateData.colorMap = parsedColorMap;
+        }
+        if (parsedVariants !== undefined) updateData.variants = parsedVariants;
+        if (parsedTags !== undefined) updateData.tags = parsedTags;
+
+        // If new images were uploaded, or existingImages were sent, we update the images array
+        if (req.files && req.files.length > 0 || req.body.existingImages !== undefined) {
+            updateData.images = [...existingImages, ...newImages];
         }
 
         // Clean up undefined values

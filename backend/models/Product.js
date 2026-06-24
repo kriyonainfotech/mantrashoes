@@ -46,10 +46,13 @@ const productSchema = new mongoose.Schema(
             {
                 name: String,
                 hex: String,
-                image: {
-                    url: String,
-                    public_id: String
-                }
+                images: [
+                    {
+                        url: String,
+                        public_id: String,
+                        index: Number
+                    }
+                ]
             }
         ],
 

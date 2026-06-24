@@ -226,9 +226,9 @@ export default function CategoryPage() {
                       className="relative overflow-hidden flex items-center justify-center p-4" // Added flex, centering, and padding
                       style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
                     >
-                      {getImg(product.images?.[0]) ? (
+                      {getImg(product.images?.[0] || product.colorMap?.find((c: any) => c.images?.length > 0)?.images?.[0]) ? (
                         <Image
-                          src={getImg(product.images[0])}
+                          src={getImg(product.images?.[0] || product.colorMap?.find((c: any) => c.images?.length > 0)?.images?.[0])}
                           alt={product.name}
                           fill
                           /* 2. Change object-cover to object-contain */

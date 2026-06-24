@@ -62,9 +62,9 @@ export default function FeaturedProducts({ data, products, theme }: { data: any,
                   className="relative overflow-hidden flex items-center justify-center p-4"
                   style={{ aspectRatio: '3/4', backgroundColor: '#ECEAE5' }}
                 >
-                  {getImg(product.images?.[0]) ? (
+                  {getImg(product.images?.[0] || product.colorMap?.find((c: any) => c.images?.length > 0)?.images?.[0]) ? (
                     <Image
-                      src={getImg(product.images[0])}
+                      src={getImg(product.images?.[0] || product.colorMap?.find((c: any) => c.images?.length > 0)?.images?.[0])}
                       alt={product.name}
                       fill
                       className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"

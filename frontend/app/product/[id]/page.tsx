@@ -112,43 +112,23 @@ export default function ProductPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (!data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f3ee' }}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-9 h-9 rounded-full animate-spin" style={{ border: '0.5px solid #0a0a0a', borderTopColor: 'transparent' }} />
-          <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.35em', color: '#888' }}>LOADING</p>
-        </div>
-      </div>
-    );
-  }
+  const product = data?.products?.find((p: any) => (p._id || p.id) === id);
 
-  const product = data.products?.find((p: any) => (p._id || p.id) === id);
-
-  if (!product) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: '#f5f3ee' }}>
-        <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '11px', letterSpacing: '0.28em', color: '#0a0a0a' }}>PRODUCT NOT FOUND</p>
-        <Link href="/" style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.22em', color: '#888' }}>← RETURN HOME</Link>
-      </div>
-    );
-  }
-
-  const images = product.images || [];
-  const variants = product.variants || [];
-  const colorMap = product.colorMap || [];
-  const hasDiscount = product.mrp > product.price;
+  const images = product?.images || [];
+  const variants = product?.variants || [];
+  const colorMap = product?.colorMap || [];
+  const hasDiscount = product && product.mrp > product.price;
   const discountPct = hasDiscount ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
-  const categoryName = product.category?.name || '';
-  const categorySlug = product.category?.slug || '';
+  const categoryName = product?.category?.name || '';
+  const categorySlug = product?.category?.slug || '';
 
   // Build color list from colorMap first, fallback to variant colors
   const colors = useMemo(() => {
     if (colorMap.length > 0) {
-      return colorMap.map((c: any) => ({ name: c.name, hex: c.hex || c.name.toLowerCase(), image: c.image }));
+      return colorMap.map((c: any) => ({ name: c.name, hex: c.hex || c.name.toLowerCase(), images: c.images || [] }));
     }
     const uniqueColors = [...new Set(variants.map((v: any) => v.color).filter(Boolean))] as string[];
-    return uniqueColors.map(c => ({ name: c, hex: c.toLowerCase(), image: null }));
+    return uniqueColors.map(c => ({ name: c, hex: c.toLowerCase(), images: [] }));
   }, [colorMap, variants]);
 
   const selectedColorName = colors[selectedColor]?.name || '';
@@ -168,19 +148,38 @@ export default function ProductPage() {
     return { label: 'In Stock', color: '#16a34a', bg: '#f0fdf4' };
   }, [selectedVariant]);
 
-  // Switch image when color is selected (if colorMap has per-color images)
-  useEffect(() => {
-    if (colors[selectedColor]?.image?.url) {
-      // Find if this color image matches any existing image, otherwise show the color image
-      const colorImgUrl = colors[selectedColor].image.url;
-      const matchIdx = images.findIndex((img: any) => getImg(img) === colorImgUrl);
-      if (matchIdx >= 0) {
-        setActiveImage(matchIdx);
-      } else {
-        setActiveImage(0); // Reset to first image
-      }
+  const displayImages = useMemo(() => {
+    if (colors[selectedColor]?.images?.length > 0) {
+      return colors[selectedColor].images;
     }
+    return images;
+  }, [colors, selectedColor, images]);
+
+  // Reset image index when color is selected
+  useEffect(() => {
+    setActiveImage(0);
   }, [selectedColor]);
+
+  // Early Returns
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f3ee' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-9 h-9 rounded-full animate-spin" style={{ border: '0.5px solid #0a0a0a', borderTopColor: 'transparent' }} />
+          <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.35em', color: '#888' }}>LOADING</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: '#f5f3ee' }}>
+        <p style={{ fontFamily: 'var(--font-cinzel)', fontSize: '11px', letterSpacing: '0.28em', color: '#0a0a0a' }}>PRODUCT NOT FOUND</p>
+        <Link href="/" style={{ fontFamily: 'var(--font-cinzel)', fontSize: '9px', letterSpacing: '0.22em', color: '#888' }}>← RETURN HOME</Link>
+      </div>
+    );
+  }
 
   const whatsappMsg = encodeURIComponent(
     `Hi, I want to order "${product.name}"${selectedSize !== null ? `, Size: UK ${sizesForColor[selectedSize]?.size}` : ''}${colors.length > 0 ? `, Color: ${selectedColorName}` : ''}${selectedVariant?.sku ? `, SKU: ${selectedVariant.sku}` : ''} — ₹${product.price?.toLocaleString()}.`
@@ -224,23 +223,25 @@ export default function ProductPage() {
                 style={{ backgroundColor: '#ffffff', aspectRatio: '1/1' }}
                 onClick={() => setZoomed(true)}
               >
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   <motion.div
-                    key={activeImage}
+                    key={`${selectedColor}-${activeImage}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, ease: 'easeInOut' }}
                     className="absolute inset-0"
                   >
-                    <Image
-                      src={getImg(images[activeImage])}
-                      alt={`${product.name} featured`}
-                      fill
-                      className="object-contain mix-blend-multiply transition-transform duration-700 hover:scale-110 p-12"
-                      referrerPolicy="no-referrer"
-                      priority
-                    />
+                    {displayImages.length > 0 && (
+                      <Image
+                        src={getImg(displayImages[activeImage])}
+                        alt={`${product.name} featured`}
+                        fill
+                        className="object-contain mix-blend-multiply transition-transform duration-700 hover:scale-110 p-12"
+                        referrerPolicy="no-referrer"
+                        priority
+                      />
+                    )}
                   </motion.div>
                 </AnimatePresence>
 
@@ -257,9 +258,9 @@ export default function ProductPage() {
               </div>
 
               {/* Thumbnail Strip */}
-              {images.length > 1 && (
+              {displayImages.length > 1 && (
                 <div className="grid grid-cols-5 gap-3">
-                  {images.map((img: any, idx: number) => (
+                  {displayImages.map((img: any, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImage(idx)}
@@ -272,7 +273,7 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {images.length === 0 && (
+              {displayImages.length === 0 && (
                 <div className="relative aspect-[1/1] bg-white flex items-center justify-center rounded-xl border border-[rgba(10,10,10,0.05)]" style={{ fontFamily: 'var(--font-cinzel)', fontSize: '10px', letterSpacing: '0.2em', color: '#aaa' }}>
                   NO IMAGE AVAILABLE
                 </div>
@@ -288,7 +289,7 @@ export default function ProductPage() {
                 if (idx !== activeImage) setActiveImage(idx);
               }}
             >
-              {images.map((img: any, idx: number) => (
+              {displayImages.map((img: any, idx: number) => (
                 <div
                   key={idx}
                   className="relative w-full aspect-square flex-shrink-0 snap-start rounded-xl border border-[rgba(10,10,10,0.05)]"
@@ -311,9 +312,9 @@ export default function ProductPage() {
               ))}
             </div>
 
-            {images.length > 1 && (
+            {displayImages.length > 1 && (
               <div className="flex justify-center gap-1.5 mt-6">
-                {images.map((_: any, i: number) => (
+                {displayImages.map((_: any, i: number) => (
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}

@@ -12,13 +12,13 @@ const {
 } = require("../controllers/productController");
 
 
-router.post("/create-product", upload.array("images", 5), createProduct);
+router.post("/create-product", upload.any(), createProduct);
 
 router.get("/get-products", getProducts);
 
 router.get("/get-product/:id", getProduct);
 
-router.put("/update-product/:id", upload.array("images", 5), updateProduct);
+router.put("/update-product/:id", upload.any(), updateProduct);
 
 router.delete("/delete-product/:id", deleteProduct);
 
