@@ -76,7 +76,7 @@ exports.createProduct = async (req, res) => {
         });
 
         let parsedTags = [];
-        if (tags) {
+        if (parsedTags) {
             try {
                 parsedTags = typeof tags === 'string' && tags.trim().startsWith('[') 
                     ? JSON.parse(tags) 
@@ -84,6 +84,11 @@ exports.createProduct = async (req, res) => {
             } catch (e) {
                 parsedTags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t);
             }
+        }
+        
+        // Fallback: If no main images provided, use the first color's images
+        if (images.length === 0 && parsedColorMap.length > 0 && parsedColorMap[0].images.length > 0) {
+            images.push(...parsedColorMap[0].images);
         }
 
         const product = await Product.create({
@@ -288,6 +293,11 @@ exports.updateProduct = async (req, res) => {
         // If new images were uploaded, or existingImages were sent, we update the images array
         if (req.files && req.files.length > 0 || req.body.existingImages !== undefined) {
             updateData.images = [...existingImages, ...newImages];
+        }
+        
+        // Fallback: If no main images provided, use the first color's images
+        if ((!updateData.images || updateData.images.length === 0) && parsedColorMap && parsedColorMap.length > 0 && parsedColorMap[0].images.length > 0) {
+            updateData.images = [...parsedColorMap[0].images];
         }
 
         // Clean up undefined values

@@ -287,13 +287,8 @@ export default function ProductsPage() {
         }
       });
 
-      // Existing main images
-      const existingImages = (editingProduct.images || []).filter((img: any) => typeof img !== 'string' || img.startsWith('http'));
-      formData.append('existingImages', JSON.stringify(existingImages));
-
-      imageFiles.forEach(file => {
-        formData.append('images', file);
-      });
+      // Existing main images are intentionally omitted as we only use colorMap images now.
+      // The backend will automatically handle the mapping if required.
 
       Object.entries(colorImageFiles).forEach(([colorIdx, files]) => {
         files.forEach(file => {
@@ -422,6 +417,8 @@ export default function ProductsPage() {
                 <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden relative flex items-center justify-center">
                   {product.images && product.images.length > 0 ? (
                     <img src={product.images[0].url} alt={product.name} className="object-cover w-full h-full" />
+                  ) : product.colorMap && product.colorMap.length > 0 && product.colorMap[0].images && product.colorMap[0].images.length > 0 ? (
+                    <img src={product.colorMap[0].images[0].url} alt={product.name} className="object-cover w-full h-full" />
                   ) : (
                     <ImageIcon className="w-5 h-5 text-gray-400" />
                   )}
@@ -493,36 +490,6 @@ export default function ProductsPage() {
 
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
-                  <div className="flex flex-wrap gap-4 mb-4">
-                    {editingProduct.images?.map((img: any, idx: number) => (
-                      <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 group">
-                        <img src={typeof img === 'string' ? img : img.url} alt="" className="w-full h-full object-cover" />
-                        {idx === 0 && <div className="absolute top-0 left-0 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg font-bold">HERO</div>}
-                        <button
-                          onClick={() => handleRemoveImage(idx)}
-                          className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-5 h-5 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                    <label className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
-                      <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                      <span className="text-xs text-gray-500 font-medium">Upload</span>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500">The first image will be used as the hero image.</p>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input
