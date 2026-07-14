@@ -10,9 +10,8 @@ const app = express();
 // Connect Database
 connectDB();
 
-// Middleware
 const allowedOrigins = [
-  "http://localhost:3000",   // local dev (Next.js)
+  "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",
   "https://mantrashoes.com",
@@ -21,22 +20,24 @@ const allowedOrigins = [
   "https://www.mantrashoes.vercel.app"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("CORS Origin checked:", origin);
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.log("CORS REJECTED origin:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // if using cookies/auth
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+  
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
