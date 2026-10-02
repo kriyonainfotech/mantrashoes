@@ -81,7 +81,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-cream/30 border border-ink/10 px-4 py-3 text-sm focus:outline-none focus:border-ink/30 transition-all font-dm-sans tracking-tight"
-                placeholder="admin@mantrashoes.com"
+                placeholder="Enter your email"
               />
             </div>
 

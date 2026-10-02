@@ -246,21 +246,20 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // 1. Save local file settings (hero, sections etc)
-      const res = await fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      // Save EVERYTHING to MongoDB settings
+      const payload = {
+        ...(formData.globalSettings || {}),
+        uiSettings: {
+          sections: formData.sections,
+          reviews: formData.reviews
+        }
+      };
 
-      // 2. Save Global MongoDB settings (whatsappNumber etc)
-      if (formData.globalSettings) {
-        await fetch(`${API_URL}/settings`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData.globalSettings),
-        });
-      }
+      const res = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
       if (res.ok) {
         setData(formData);

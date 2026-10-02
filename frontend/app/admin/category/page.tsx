@@ -281,9 +281,10 @@ export default function CategoriesPage() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xs bg-ink text-white font-bebas text-lg tracking-widest hover:bg-ink/90 transition-all active:scale-[0.98]"
+                  disabled={isLoading}
+                  className="w-full py-3 rounded-xs bg-ink text-white font-bebas text-lg tracking-widest hover:bg-ink/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingCategory ? 'Update System' : 'Create Entry'}
+                  {isLoading ? 'Saving...' : (editingCategory ? 'Update System' : 'Create Entry')}
                 </button>
               </div>
             </form>

@@ -9,7 +9,8 @@ const settingSchema = new mongoose.Schema({
         instagram: { type: String, default: "" },
         facebook: { type: String, default: "" },
         twitter: { type: String, default: "" },
-    }
+    },
+    uiSettings: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 
 // Ensure only one setting document exists

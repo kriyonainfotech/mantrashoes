@@ -12,48 +12,51 @@
       "enabled": true,
       "title": "Move With Confidence",
       "subtitle": "Premium shoes engineered for performance and style.",
-      "image": "https://picsum.photos/seed/mantrahero/1920/1080",
+      "image": "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790929983/settings/yvreg8azsr1gcadph07g.jpg",
       "button1Text": "Shop Now",
       "button1Link": "/shop",
       "button2Text": "Explore Collection",
       "button2Link": "/collections"
     },
-    "featuredProducts": {
-      "enabled": true,
-      "title": "Featured Collection"
-    },
     "brandStory": {
       "enabled": true,
       "title": "Crafted for the Bold",
       "description": "Every pair of Mantra shoes is a testament to our commitment to quality, performance, and uncompromising style. We believe in pushing boundaries and setting new standards.",
-      "image": "https://picsum.photos/seed/mantrastory/800/1000"
+      "image": "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790931389/settings/r4w1gkqkjkiuli0olyxf.jpg"
     },
     "reviews": {
       "enabled": true,
       "title": "Customer Reviews"
+    },
+    "featured": {
+      "enabled": true,
+      "title": "Featured Collection"
     },
     "instagram": {
       "enabled": true,
       "title": "Follow Us @MantraShoes",
       "profileLink": "https://instagram.com",
       "images": [
-        "https://picsum.photos/seed/ig1/400/400",
-        "https://picsum.photos/seed/ig2/400/400",
-        "https://picsum.photos/seed/ig3/400/400",
-        "https://picsum.photos/seed/ig4/400/400",
-        "https://picsum.photos/seed/ig5/400/400",
-        "https://picsum.photos/seed/ig6/400/400"
+        "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790932982/settings/wadysolsl93tzjq8ammo.jpg",
+        "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790932994/settings/h9lklj0dqyeygut00g7k.jpg",
+        "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790933004/settings/hu1fcmbbqvhg2ch41nuq.jpg",
+        "https://res.cloudinary.com/dd6vjyu3c/image/upload/v1790933011/settings/qjzvpsmezagexvoyz4if.jpg"
       ]
+    },
+    "footer": {
+      "enabled": true,
+      "description": "Authentic, comfortable footwear trusted by Surat families for decades.",
+      "email": "hello@mantrashoes.com",
+      "phone": "+91 74050 40700",
+      "address": "Shop No B-3, Varachha Main Rd, Sarthana Jakat Naka, Nana Varachha, Surat"
+    },
+    "featuredProducts": {
+      "enabled": true,
+      "title": "Featured Collection"
     },
     "newsletter": {
       "enabled": true,
       "title": "Join the Mantra Club"
-    },
-    "footer": {
-      "description": "Authentic, comfortable footwear trusted by Surat families for decades.",
-      "phone": "+91 74050 40700",
-      "address": "Shop No B-3, Varachha Main Rd, Sarthana Jakat Naka, Nana Varachha, Surat",
-      "email": "hello@mantrashoes.com"
     },
     "shopHeader": {
       "title": "ALL PRODUCTS",
@@ -68,7 +71,381 @@
       "subtitle": "The journey of Mantra Shoes and our commitment to excellence."
     }
   },
-  "products": [],
+  "products": [
+    {
+      "_id": "6a28f19a1eb75da9e91c6b66",
+      "name": "Skechers Slipper 896323ID",
+      "description": "Crochet-knit upper. Three-point flip-flop sandal design. Flexible Ultra Flex midsole. Yoga Foam cushioned footbed for soft underfoot comfort. Focuses on comfort rather than athletic performance.",
+      "price": 2999,
+      "mrp": 2999,
+      "discount": 0,
+      "category": {
+        "_id": "6a27a5e5fd7efbcbb98dbb3e",
+        "name": "Sports Footwear",
+        "slug": "women-sports-footwear",
+        "description": "Women's Sports Footwear",
+        "parent": "69bd689a0e845f2818053830",
+        "isActive": true,
+        "showInNavbar": false,
+        "showOnHome": false,
+        "navbarIndex": 0,
+        "createdAt": "2026-06-09T05:34:29.404Z",
+        "updatedAt": "2026-06-09T05:34:29.404Z",
+        "__v": 0
+      },
+      "brand": "SKECHERS",
+      "images": [
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1781068635/products/uo18hpg0xsxfjlqfpcoi.png",
+          "public_id": "products/uo18hpg0xsxfjlqfpcoi",
+          "index": 0,
+          "_id": "6a28f35b1eb75da9e91c6b85"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1781068635/products/fxpxvwsgzhgn8ordmo7w.png",
+          "public_id": "products/fxpxvwsgzhgn8ordmo7w",
+          "index": 1,
+          "_id": "6a28f35b1eb75da9e91c6b86"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1781068635/products/qfruz6wcl3bojow9upvy.png",
+          "public_id": "products/qfruz6wcl3bojow9upvy",
+          "index": 2,
+          "_id": "6a28f35b1eb75da9e91c6b87"
+        }
+      ],
+      "variants": [],
+      "material": "Cloth",
+      "soleMaterial": "Eva",
+      "tags": [],
+      "isFeatured": false,
+      "isActive": true,
+      "createdAt": "2026-06-10T05:09:46.659Z",
+      "updatedAt": "2026-06-10T05:17:15.940Z",
+      "__v": 0,
+      "colorMap": []
+    },
+    {
+      "_id": "6a28eee6489f8377552182e1",
+      "name": "Buckaroo Frera Casual Shoes",
+      "description": "Genuine leather upper. Cushioned footbed for comfort. Suitable for office-casual and daily wear. Leather construction gives it a more premium look than synthetic loafers.",
+      "price": 3495,
+      "mrp": 3495,
+      "discount": 0,
+      "category": {
+        "_id": "69bc0a1cd573f02241ebc3d3",
+        "name": "Casual Footwear",
+        "slug": "mens-casual-footwear",
+        "description": "",
+        "parent": "69bc0a01d573f02241ebc3d1",
+        "isActive": true,
+        "showInNavbar": false,
+        "navbarIndex": 0,
+        "createdAt": "2026-03-19T14:37:16.346Z",
+        "updatedAt": "2026-06-10T05:11:31.879Z",
+        "__v": 0,
+        "showOnHome": false
+      },
+      "brand": "BUCKAROO",
+      "images": [
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/qurwnkes4x5yhea29szw.jpg",
+          "public_id": "products/qurwnkes4x5yhea29szw",
+          "_id": "6aaa91ab7c09fb6fe136cdba"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/sknljbbighwy6ef4l6i9.jpg",
+          "public_id": "products/sknljbbighwy6ef4l6i9",
+          "_id": "6aaa91ab7c09fb6fe136cdbb"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/ivikbggslqmphtwevt3u.jpg",
+          "public_id": "products/ivikbggslqmphtwevt3u",
+          "_id": "6aaa91ab7c09fb6fe136cdbc"
+        }
+      ],
+      "variants": [
+        {
+          "size": 7,
+          "color": "BLACK",
+          "stock": 2,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d34"
+        },
+        {
+          "size": 6,
+          "color": "BLACK",
+          "stock": 3,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d35"
+        },
+        {
+          "size": 8,
+          "color": "BLACK",
+          "stock": 2,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d36"
+        },
+        {
+          "size": 9,
+          "color": "BLACK",
+          "stock": 2,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d37"
+        },
+        {
+          "size": 10,
+          "color": "BLACK",
+          "stock": 3,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d38"
+        },
+        {
+          "size": 6,
+          "color": "BROWN",
+          "stock": 9,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d39"
+        },
+        {
+          "size": 7,
+          "color": "BROWN",
+          "stock": 9,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d3a"
+        },
+        {
+          "size": 8,
+          "color": "BROWN",
+          "stock": 9,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d3b"
+        },
+        {
+          "size": 9,
+          "color": "BROWN",
+          "stock": 9,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d3c"
+        },
+        {
+          "size": 10,
+          "color": "BROWN",
+          "stock": 9,
+          "sku": "",
+          "_id": "6a3a191fd94c5f525f5b8d3d"
+        }
+      ],
+      "material": "Genuine Leather",
+      "soleMaterial": "Rubber",
+      "tags": [],
+      "isFeatured": false,
+      "isActive": true,
+      "createdAt": "2026-06-10T04:58:14.992Z",
+      "updatedAt": "2026-09-22T06:29:47.287Z",
+      "__v": 0,
+      "colorMap": [
+        {
+          "name": "BLACK",
+          "hex": "#000000",
+          "images": [
+            {
+              "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/qurwnkes4x5yhea29szw.jpg",
+              "public_id": "products/qurwnkes4x5yhea29szw",
+              "_id": "6aaa91ab7c09fb6fe136cdba"
+            },
+            {
+              "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/sknljbbighwy6ef4l6i9.jpg",
+              "public_id": "products/sknljbbighwy6ef4l6i9",
+              "_id": "6aaa91ab7c09fb6fe136cdbb"
+            },
+            {
+              "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/ivikbggslqmphtwevt3u.jpg",
+              "public_id": "products/ivikbggslqmphtwevt3u",
+              "_id": "6aaa91ab7c09fb6fe136cdbc"
+            }
+          ],
+          "_id": "6a3a1806d94c5f525f5b8cd9"
+        },
+        {
+          "name": "BROWN",
+          "hex": "#522e2e",
+          "images": [
+            {
+              "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/r3c9zieutwlyq02lxy7o.jpg",
+              "public_id": "products/r3c9zieutwlyq02lxy7o",
+              "_id": "6aaa91ab7c09fb6fe136cdc2"
+            },
+            {
+              "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1789563306/products/i1gcgcm5usklrvwt3rck.jpg",
+              "public_id": "products/i1gcgcm5usklrvwt3rck",
+              "_id": "6aaa91ab7c09fb6fe136cdc3"
+            }
+          ],
+          "_id": "6a3a191fd94c5f525f5b8d33"
+        }
+      ]
+    },
+    {
+      "_id": "6a27c76e6ccb707ebcb024c9",
+      "name": "Puma Sliders - 39831902",
+      "description": "Lightweight IMEVA construction for comfort and reduced weight. Soft molded footbed with textured grooves for grip. Slip-on design for easy everyday use. Suitable for casual wear, poolside use, travel, and daily walking.",
+      "price": 1999,
+      "mrp": 1999,
+      "discount": 0,
+      "category": {
+        "_id": "69d1ef3ac1f7deb9a382ff54",
+        "name": "Sports Footwear",
+        "slug": "mens-sports-footwear",
+        "description": "ALL SPORTS SHOES",
+        "parent": "69bc0a01d573f02241ebc3d1",
+        "isActive": true,
+        "showInNavbar": false,
+        "showOnHome": false,
+        "navbarIndex": 0,
+        "createdAt": "2026-04-05T05:12:26.752Z",
+        "updatedAt": "2026-06-10T05:11:50.441Z",
+        "__v": 0
+      },
+      "brand": "PUMA",
+      "images": [
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780991853/products/fues2s9nvza4d28aasra.jpg",
+          "public_id": "products/fues2s9nvza4d28aasra",
+          "index": 0,
+          "_id": "6a27c76e6ccb707ebcb024ca"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780991853/products/uqvhouauw53olfgftjxf.jpg",
+          "public_id": "products/uqvhouauw53olfgftjxf",
+          "index": 1,
+          "_id": "6a27c76e6ccb707ebcb024cb"
+        }
+      ],
+      "variants": [],
+      "material": "Synthetic",
+      "soleMaterial": "Injected EVA (IMEVA)",
+      "tags": [],
+      "isFeatured": false,
+      "isActive": true,
+      "createdAt": "2026-06-09T07:57:34.087Z",
+      "updatedAt": "2026-06-09T07:57:34.087Z",
+      "__v": 0,
+      "colorMap": []
+    },
+    {
+      "_id": "6a27ae18d72032cacd549e3c",
+      "name": "Puma Softride - 391860",
+      "description": "Soft and cushioned SOFTRIDE footbed for all-day comfort. Synthetic upper with a slip-on design. Rubber outsole for grip and durability. Lightweight construction suitable for casual wear, travel, and daily use.",
+      "price": 2999,
+      "mrp": 2999,
+      "discount": 0,
+      "category": {
+        "_id": "69d1ef3ac1f7deb9a382ff54",
+        "name": "Sports Footwear",
+        "slug": "mens-sports-footwear",
+        "description": "ALL SPORTS SHOES",
+        "parent": "69bc0a01d573f02241ebc3d1",
+        "isActive": true,
+        "showInNavbar": false,
+        "showOnHome": false,
+        "navbarIndex": 0,
+        "createdAt": "2026-04-05T05:12:26.752Z",
+        "updatedAt": "2026-06-10T05:11:50.441Z",
+        "__v": 0
+      },
+      "brand": "PUMA",
+      "images": [
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780985367/products/v5b6gwctsd6g99mds0qu.jpg",
+          "public_id": "products/v5b6gwctsd6g99mds0qu",
+          "index": 0,
+          "_id": "6a27ae18d72032cacd549e3d"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780985367/products/tpvpvcn39tckzaltvlex.jpg",
+          "public_id": "products/tpvpvcn39tckzaltvlex",
+          "index": 1,
+          "_id": "6a27ae18d72032cacd549e3e"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780985367/products/ox2mdskjjsi1icvqdspr.jpg",
+          "public_id": "products/ox2mdskjjsi1icvqdspr",
+          "index": 2,
+          "_id": "6a27ae18d72032cacd549e3f"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780985367/products/csuvw5k9yyayy6pheboh.jpg",
+          "public_id": "products/csuvw5k9yyayy6pheboh",
+          "index": 3,
+          "_id": "6a27ae18d72032cacd549e40"
+        }
+      ],
+      "variants": [],
+      "material": "Synthetic",
+      "soleMaterial": "Rubber",
+      "tags": [],
+      "isFeatured": false,
+      "isActive": true,
+      "createdAt": "2026-06-09T06:09:28.526Z",
+      "updatedAt": "2026-06-09T06:09:28.526Z",
+      "__v": 0,
+      "colorMap": []
+    },
+    {
+      "_id": "6a27a8dc44a1e447a39ed6a3",
+      "name": "Puma Running Shoes - 31042503",
+      "description": "Lightweight textile upper for breathability. Regular fit with lace closure. Neutral pronation design. Flat heel profile and low-cut silhouette.",
+      "price": 2999,
+      "mrp": 2999,
+      "discount": 0,
+      "category": {
+        "_id": "69d1ef3ac1f7deb9a382ff54",
+        "name": "Sports Footwear",
+        "slug": "mens-sports-footwear",
+        "description": "ALL SPORTS SHOES",
+        "parent": "69bc0a01d573f02241ebc3d1",
+        "isActive": true,
+        "showInNavbar": false,
+        "showOnHome": false,
+        "navbarIndex": 0,
+        "createdAt": "2026-04-05T05:12:26.752Z",
+        "updatedAt": "2026-06-10T05:11:50.441Z",
+        "__v": 0
+      },
+      "brand": "Puma",
+      "images": [
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780984027/products/sqjdjghr8amv1yvoo1xv.jpg",
+          "public_id": "products/sqjdjghr8amv1yvoo1xv",
+          "index": 0,
+          "_id": "6a27a8dc44a1e447a39ed6a4"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780984027/products/j08byvxh4xfe2bkuqlv4.jpg",
+          "public_id": "products/j08byvxh4xfe2bkuqlv4",
+          "index": 1,
+          "_id": "6a27a8dc44a1e447a39ed6a5"
+        },
+        {
+          "url": "https://res.cloudinary.com/dunjui9yq/image/upload/v1780984027/products/smztsqcryp8xzchbegua.jpg",
+          "public_id": "products/smztsqcryp8xzchbegua",
+          "index": 2,
+          "_id": "6a27a8dc44a1e447a39ed6a6"
+        }
+      ],
+      "variants": [],
+      "material": "Durable Rubber",
+      "soleMaterial": "Phylon",
+      "tags": [],
+      "isFeatured": false,
+      "isActive": true,
+      "createdAt": "2026-06-09T05:47:08.025Z",
+      "updatedAt": "2026-06-09T05:47:59.898Z",
+      "__v": 0,
+      "colorMap": []
+    }
+  ],
   "collections": [
     {
       "id": "1",
@@ -111,5 +488,184 @@
       "review": "Great performance and support. Took a few days to break in, but now they are perfect.",
       "image": "https://picsum.photos/seed/user3/100/100"
     }
-  ]
+  ],
+  "categories": [
+    {
+      "_id": "69bc0a01d573f02241ebc3d1",
+      "name": "Men's Collection",
+      "slug": "mens-collection",
+      "description": "",
+      "parent": null,
+      "isActive": true,
+      "showInNavbar": true,
+      "navbarIndex": 0,
+      "createdAt": "2026-03-19T14:36:49.676Z",
+      "updatedAt": "2026-06-09T05:35:49.386Z",
+      "__v": 0,
+      "isFeatured": true,
+      "showOnHome": false
+    },
+    {
+      "_id": "69bc0a1cd573f02241ebc3d3",
+      "name": "Casual Footwear",
+      "slug": "mens-casual-footwear",
+      "description": "",
+      "parent": {
+        "_id": "69bc0a01d573f02241ebc3d1",
+        "name": "Men's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-03-19T14:37:16.346Z",
+      "updatedAt": "2026-06-10T05:11:31.879Z",
+      "__v": 0,
+      "showOnHome": false
+    },
+    {
+      "_id": "69bc0a2cd573f02241ebc3d5",
+      "name": "Party Footwear",
+      "slug": "mens-party-footwear",
+      "description": "",
+      "parent": {
+        "_id": "69bc0a01d573f02241ebc3d1",
+        "name": "Men's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-03-19T14:37:32.386Z",
+      "updatedAt": "2026-06-10T05:11:21.171Z",
+      "__v": 0,
+      "isFeatured": true,
+      "showOnHome": false
+    },
+    {
+      "showOnHome": false,
+      "_id": "69bd689a0e845f2818053830",
+      "name": "Women's Collection",
+      "slug": "womens-collection",
+      "description": "",
+      "parent": null,
+      "isActive": true,
+      "showInNavbar": true,
+      "navbarIndex": 0,
+      "createdAt": "2026-03-20T15:32:42.090Z",
+      "updatedAt": "2026-03-20T15:32:42.090Z",
+      "__v": 0
+    },
+    {
+      "_id": "69c36cdebb35ac2f1ec96638",
+      "name": "Casual Footwear",
+      "slug": "women-casual-footwear",
+      "description": "Casual Footwear for Women",
+      "parent": {
+        "_id": "69bd689a0e845f2818053830",
+        "name": "Women's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-03-25T05:04:30.282Z",
+      "updatedAt": "2026-06-10T04:45:21.291Z",
+      "__v": 0,
+      "showOnHome": false
+    },
+    {
+      "_id": "69d1ef3ac1f7deb9a382ff54",
+      "name": "Sports Footwear",
+      "slug": "mens-sports-footwear",
+      "description": "ALL SPORTS SHOES",
+      "parent": {
+        "_id": "69bc0a01d573f02241ebc3d1",
+        "name": "Men's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "showOnHome": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-04-05T05:12:26.752Z",
+      "updatedAt": "2026-06-10T05:11:50.441Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a27a373fd7efbcbb98dbb32",
+      "name": "Kids Collection",
+      "slug": "kids-collection",
+      "description": "",
+      "parent": null,
+      "isActive": true,
+      "showInNavbar": true,
+      "showOnHome": true,
+      "navbarIndex": 0,
+      "createdAt": "2026-06-09T05:24:03.961Z",
+      "updatedAt": "2026-06-09T05:24:38.574Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a27a5e5fd7efbcbb98dbb3e",
+      "name": "Sports Footwear",
+      "slug": "women-sports-footwear",
+      "description": "Women's Sports Footwear",
+      "parent": {
+        "_id": "69bd689a0e845f2818053830",
+        "name": "Women's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "showOnHome": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-06-09T05:34:29.404Z",
+      "updatedAt": "2026-06-09T05:34:29.404Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a27a610eff3cbc7d91676cb",
+      "name": "Party Footwear",
+      "slug": "women-party-footwear",
+      "description": "Women's Party Footwear",
+      "parent": {
+        "_id": "69bd689a0e845f2818053830",
+        "name": "Women's Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "showOnHome": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-06-09T05:35:12.213Z",
+      "updatedAt": "2026-06-10T04:45:09.685Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a27a65ae08a641e112ebf65",
+      "name": "Sports Footwear",
+      "slug": "kids-sports-footwear",
+      "description": "Kids Sports Footwear",
+      "parent": {
+        "_id": "6a27a373fd7efbcbb98dbb32",
+        "name": "Kids Collection"
+      },
+      "isActive": true,
+      "showInNavbar": false,
+      "showOnHome": false,
+      "navbarIndex": 0,
+      "createdAt": "2026-06-09T05:36:26.733Z",
+      "updatedAt": "2026-06-10T04:45:14.998Z",
+      "__v": 0
+    }
+  ],
+  "globalSettings": {
+    "socialLinks": {
+      "instagram": "",
+      "facebook": "",
+      "twitter": ""
+    },
+    "_id": "69d719c24a5bf079fb948668",
+    "whatsappNumber": "+917405040700",
+    "email": "",
+    "address": "",
+    "createdAt": "2026-04-09T03:15:14.833Z",
+    "updatedAt": "2026-06-09T07:19:09.144Z",
+    "__v": 0
+  }
 }

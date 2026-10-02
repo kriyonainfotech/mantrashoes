@@ -15,11 +15,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (get().data && !force) return;
     try {
       // Fetch all sources in parallel
-      const [prodRes, catRes, settingsRes, globalRes] = await Promise.all([
-        fetch(`${API_URL}/products/get-products`),
-        fetch(`${API_URL}/categories/get-categories`),
-        fetch('/api/data'),
-        fetch(`${API_URL}/settings`),
+      const [prodRes, catRes, globalRes] = await Promise.all([
+        fetch(`${API_URL}/products/get-products`, { cache: 'no-store' }),
+        fetch(`${API_URL}/categories/get-categories`, { cache: 'no-store' }),
+        fetch(`${API_URL}/settings`, { cache: 'no-store' }),
       ]);
 
       // Products
@@ -34,15 +33,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       // Global Settings (DB-based)
       let globalSettings = { whatsappNumber: '+917405040700' }; // Default
+      let settingsData: any = {};
+      
       if (globalRes.ok) {
         const gData = await globalRes.json();
-        if (gData.success) globalSettings = gData.settings;
-      }
-
-      // Sections data (File-based fallback)
-      let settingsData: any = {};
-      if (settingsRes.ok) {
-        try { settingsData = await settingsRes.json(); } catch (_) {}
+        if (gData.success) {
+          globalSettings = gData.settings;
+          settingsData = gData.settings.uiSettings || {};
+        }
       }
 
       // Merge: settings sections override defaults, but products/categories always come from backend
@@ -89,11 +87,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const reviews = settingsData.reviews && settingsData.reviews.length > 0
         ? settingsData.reviews
-        : [
-            { id: '1', name: 'Rahul Patel', review: 'Best shoe store in Surat! Quality is unmatched and very comfortable.', rating: 5, image: '' },
-            { id: '2', name: 'Priya Shah', review: 'Amazing collection and helpful staff. Highly recommended!', rating: 5, image: '' },
-            { id: '3', name: 'Amit Desai', review: 'Trustworthy brand with great prices. My whole family shops here.', rating: 5, image: '' },
-          ];
+        : [];
 
       set({
         data: {

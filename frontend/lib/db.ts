@@ -12,7 +12,7 @@ export const defaultData = {
       enabled: true,
       title: "Move With Confidence",
       subtitle: "Premium shoes engineered for performance and style.",
-      image: "https://picsum.photos/seed/mantrahero/1920/1080",
+      image: "",
       button1Text: "Shop Now",
       button1Link: "/shop",
       button2Text: "Explore Collection",
@@ -26,7 +26,7 @@ export const defaultData = {
       enabled: true,
       title: "Crafted for the Bold",
       description: "Every pair of Mantra shoes is a testament to our commitment to quality, performance, and uncompromising style. We believe in pushing boundaries and setting new standards.",
-      image: "https://picsum.photos/seed/mantrastory/800/1000"
+      image: ""
     },
     reviews: {
       enabled: true,
@@ -36,14 +36,7 @@ export const defaultData = {
       enabled: true,
       title: "Follow Us @MantraShoes",
       profileLink: "https://instagram.com",
-      images: [
-        "https://picsum.photos/seed/ig1/400/400",
-        "https://picsum.photos/seed/ig2/400/400",
-        "https://picsum.photos/seed/ig3/400/400",
-        "https://picsum.photos/seed/ig4/400/400",
-        "https://picsum.photos/seed/ig5/400/400",
-        "https://picsum.photos/seed/ig6/400/400"
-      ]
+      images: []
     },
     newsletter: {
       enabled: true,
@@ -74,19 +67,19 @@ export const defaultData = {
       id: "1",
       title: "Running Collection",
       description: "Engineered for speed and endurance.",
-      image: "https://picsum.photos/seed/running/1200/600"
+      image: ""
     },
     {
       id: "2",
       title: "Urban Sneakers",
       description: "Street-ready style meets all-day comfort.",
-      image: "https://picsum.photos/seed/urban/1200/600"
+      image: ""
     },
     {
       id: "3",
       title: "Performance Series",
       description: "Push your limits with pro-level gear.",
-      image: "https://picsum.photos/seed/performance/1200/600"
+      image: ""
     }
   ],
   reviews: [
@@ -95,21 +88,21 @@ export const defaultData = {
       name: "Alex Johnson",
       rating: 5,
       review: "The most comfortable running shoes I've ever owned. The Phantom series is incredible.",
-      image: "https://picsum.photos/seed/user1/100/100"
+      image: ""
     },
     {
       "id": "2",
       "name": "Sarah Williams",
       "rating": 5,
       "review": "Sleek, modern, and perfect for city life. I get compliments on my Stealths daily.",
-      "image": "https://picsum.photos/seed/user2/100/100"
+      "image": ""
     },
     {
       "id": "3",
       "name": "Michael Chen",
       "rating": 4,
       "review": "Great performance and support. Took a few days to break in, but now they are perfect.",
-      "image": "https://picsum.photos/seed/user3/100/100"
+      "image": ""
     }
   ]
 };

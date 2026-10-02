@@ -151,19 +151,29 @@ export default function ProductsPage() {
       reader.onloadend = () => {
         setEditingProduct((prev: any) => {
           const newColorMap = [...(prev.colorMap || [])];
-          if (!newColorMap[colorIndex].images) newColorMap[colorIndex].images = [];
-          newColorMap[colorIndex].images = [...newColorMap[colorIndex].images, reader.result as string];
+          // Deep clone the specific color object to avoid mutation
+          const updatedColor = { ...newColorMap[colorIndex] };
+          
+          if (!updatedColor.images) updatedColor.images = [];
+          updatedColor.images = [...updatedColor.images, reader.result as string];
+          
+          newColorMap[colorIndex] = updatedColor;
           return { ...prev, colorMap: newColorMap };
         });
       };
       reader.readAsDataURL(file);
     });
+    
+    // Clear the input value so the same file can be selected again if needed
+    e.target.value = '';
   };
 
   const handleRemoveColorImage = (colorIndex: number, imageIndex: number) => {
     setEditingProduct((prev: any) => {
       const newColorMap = [...(prev.colorMap || [])];
-      newColorMap[colorIndex].images = newColorMap[colorIndex].images.filter((_: any, i: number) => i !== imageIndex);
+      const updatedColor = { ...newColorMap[colorIndex] };
+      updatedColor.images = updatedColor.images.filter((_: any, i: number) => i !== imageIndex);
+      newColorMap[colorIndex] = updatedColor;
       return { ...prev, colorMap: newColorMap };
     });
     setColorImageFiles(prev => {
@@ -255,6 +265,10 @@ export default function ProductsPage() {
 
   const handleSaveProduct = async () => {
     if (!editingProduct) return;
+    if (!editingProduct.category || editingProduct.category === '') {
+      toast.error("Please select a category for the product.");
+      return;
+    }
     if (!editingProduct.colorMap || editingProduct.colorMap.length === 0) {
       toast.error("Please add at least one color option.");
       return;

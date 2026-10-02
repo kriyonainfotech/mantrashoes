@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getData, saveData } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const data = getData();
   return NextResponse.json(data);
